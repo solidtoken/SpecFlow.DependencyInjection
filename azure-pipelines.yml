@@ -1,0 +1,33 @@
+# DotNetCore Restore/Build/Test/Pack
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+# Restore
+- task: DotNetCoreCLI@2
+  displayName: Restore
+  inputs:
+    command: restore
+    arguments: '--configuration Release'
+# Build
+- task: DotNetCoreCLI@2
+  displayName: Build
+  inputs:
+    command: build
+    arguments: '--configuration Release'
+# Test
+- task: DotNetCoreCLI@2
+  displayName: Test
+  inputs:
+    command: test
+    arguments: '--configuration Release'
+# Pack
+- task: DotNetCoreCLI@2
+  displayName: Pack
+  inputs:
+    command: pack
+    arguments: '--configuration Release'
