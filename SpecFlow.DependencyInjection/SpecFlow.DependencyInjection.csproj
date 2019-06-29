@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<AssemblyName>SolidToken.SpecFlow.DependencyInjection.SpecFlowPlugin</AssemblyName>
+		<PackageId>SolidToken.SpecFlow.DependencyInjection</PackageId>
+		<Description>SpecFlow Plugin for Microsoft.Extensions.DependencyInjection</Description>
+		<Authors>Mark Hoek</Authors>
+		<Company>Solid Token</Company>
+		<Copyright>Copyright (c) Solid Token (https://www.solidtoken.nl)</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression> 
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/solidtoken/SpecFlow.DependencyInjection.git</RepositoryUrl>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<RootNamespace>SolidToken.SpecFlow.DependencyInjection</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="GitVersionTask" Version="4.0.1-beta1-65">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+		<PackageReference Include="SpecFlow" Version="3.0.224" />
+	</ItemGroup>
+</Project>
