@@ -1,10 +1,13 @@
 # DotNetCore Restore/Build/Test/Pack
 
+variables:
+  BuildConfiguration: Release
+  
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+#pool:
+#  vmImage: 'ubuntu-latest'
 
 steps:
 # Restore
