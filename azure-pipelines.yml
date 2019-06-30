@@ -34,3 +34,9 @@ steps:
   inputs:
     command: pack
     nobuild: true
+# Publish
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
