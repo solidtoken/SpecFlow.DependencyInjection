@@ -14,6 +14,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19324-01">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="SpecFlow" Version="3.0.224" />
     <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.0.224" />
     <PackageReference Include="SpecFlow.xUnit" Version="3.0.224" />

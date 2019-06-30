@@ -14,29 +14,43 @@ You can find me (@mbhoek) on https://gitter.im/techtalk/specflow-plugin-dev for 
 - [ ] Proper README
 - [x] Add LICENSE
 - [ ] Make issue tracker available (1.0.0+)
+- [ ] Move TODO to TODO+ document?
+  - Too bad VS does not support TODO+ extension (it's VSCode only)
+- [ ] Howto setup services
+  - [ ] NuGet
+  - [ ] Azure DevOps
+  - [ ] GitHub
 
 ### CI/CD
 
 - [x] Semantic versioning
   - GitVersion Build Task
-- [ ] GitHub workflow (?)
+- [x] GitHub workflow (?)
   - https://guides.github.com/introduction/flow/
-- [ ] CI -> Azure Pipelines
-  - [ ] Build using Azure Pipelines
-  - [ ] Smoke Test using the .Tests project
+  - Can't really get used to this, I prefer gitflow thus far
+  - Trying to stick to it just to learn
+- [x] CI -> Azure Pipelines
+  - [x] Build using Azure Pipelines
+  - [x] Smoke Test using the .Tests project
 - [ ] CD -> NuGet
-  - [ ] Release a succesful build (gating?)
+  - [x] Release a succesful build (gating?)
   - [ ] Signed packages
     - https://docs.microsoft.com/en-us/nuget/reference/signed-packages-reference
     - I'd like to sign the release commits (in git) as well (tags?)
+    - Signed packages feels like a hassle with the Certification needed (and costs)
+    - Probably best delayed until it's a really popular package
+  - [ ] GitHub Releases? How and why?
+    - [x] Implement GitHub Release from Azure DevOps
+    - Still feels like you always need a manual step to release (vs GitFlow which allows you to auto-release)
 
 ### Code
 
 - [x] Add .gitignore
 - [ ] Add .editorconfig
 - [ ] Add source code quality guidelines
-- [ ] Add SourceLink 
+- [x] Add SourceLink 
   - https://devblogs.microsoft.com/nuget/introducing-source-code-link-for-nuget-packages/
+- [x] Set Assembly metadata correctly
 
 ### Tests
 
@@ -52,4 +66,3 @@ You can find me (@mbhoek) on https://gitter.im/techtalk/specflow-plugin-dev for 
   - [ ] Slack
   - [ ] Twitter
   - [ ] LinkedIn
-  - [ ] GitHub Releases
