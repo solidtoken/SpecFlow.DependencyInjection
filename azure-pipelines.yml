@@ -1,4 +1,4 @@
-# DotNetCore Restore/Build/Test/Pack
+# DotNetCore Restore/Build/Test/Pack/Publish
 
 variables:
   BuildConfiguration: Release
@@ -36,6 +36,7 @@ steps:
     nobuild: true
 # Publish
 - task: PublishBuildArtifacts@1
+  displayName: Publish
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'NuGet'
