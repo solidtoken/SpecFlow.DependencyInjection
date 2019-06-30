@@ -20,13 +20,14 @@ steps:
   displayName: Build
   inputs:
     command: build
-    configuration: $(BuildConfiguration)
+    arguments: '--configuration $(BuildConfiguration)'
 # Test
 - task: DotNetCoreCLI@2
   displayName: Test
   inputs:
     command: test
-    configuration: $(BuildConfiguration)
+    projects: '**/*.Tests/*.csproj'
+    arguments: '--configuration $(BuildConfiguration)'
 # Pack
 - task: DotNetCoreCLI@2
   displayName: Pack
