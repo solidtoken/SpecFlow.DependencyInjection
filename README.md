@@ -19,13 +19,13 @@ You can find me (@mbhoek) on https://gitter.im/techtalk/specflow-plugin-dev for 
 
 - [x] Semantic versioning
   - GitVersion Build Task
-- [ ] GitHub workflow (?)
+- [x] GitHub workflow (?)
   - https://guides.github.com/introduction/flow/
-- [ ] CI -> Azure Pipelines
-  - [ ] Build using Azure Pipelines
-  - [ ] Smoke Test using the .Tests project
+- [x] CI -> Azure Pipelines
+  - [x] Build using Azure Pipelines
+  - [x] Smoke Test using the .Tests project
 - [ ] CD -> NuGet
-  - [ ] Release a succesful build (gating?)
+  - [x] Release a succesful build (gating?)
   - [ ] Signed packages
     - https://docs.microsoft.com/en-us/nuget/reference/signed-packages-reference
     - I'd like to sign the release commits (in git) as well (tags?)
@@ -37,6 +37,7 @@ You can find me (@mbhoek) on https://gitter.im/techtalk/specflow-plugin-dev for 
 - [ ] Add source code quality guidelines
 - [ ] Add SourceLink 
   - https://devblogs.microsoft.com/nuget/introducing-source-code-link-for-nuget-packages/
+- [x] Set Assembly metadata correctly
 
 ### Tests
 
