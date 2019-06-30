@@ -1,0 +1,43 @@
+# DotNetCore Restore/Build/Test/Pack/Publish
+
+variables:
+  BuildConfiguration: Release
+  
+trigger:
+- master
+
+#pool:
+#  vmImage: 'ubuntu-latest'
+
+steps:
+# Restore
+- task: DotNetCoreCLI@2
+  displayName: Restore
+  inputs:
+    command: restore
+# Build
+- task: DotNetCoreCLI@2
+  displayName: Build
+  inputs:
+    command: build
+    arguments: '--configuration $(BuildConfiguration)'
+# Test
+- task: DotNetCoreCLI@2
+  displayName: Test
+  inputs:
+    command: test
+    projects: '**/*.Tests/*.csproj'
+    arguments: '--configuration $(BuildConfiguration)'
+# Pack
+- task: DotNetCoreCLI@2
+  displayName: Pack
+  inputs:
+    command: pack
+    nobuild: true
+# Publish
+- task: PublishBuildArtifacts@1
+  displayName: Publish
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'NuGet'
+    publishLocation: 'Container'
