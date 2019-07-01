@@ -13,6 +13,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<RootNamespace>SolidToken.SpecFlow.DependencyInjection</RootNamespace>
 		<AssemblyName>SolidToken.SpecFlow.DependencyInjection.SpecFlowPlugin</AssemblyName>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>		
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="build\**" Pack="True" PackagePath="build\" />
