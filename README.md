@@ -66,3 +66,10 @@ You can find me (@mbhoek) on https://gitter.im/techtalk/specflow-plugin-dev for 
   - [ ] Slack
   - [ ] Twitter
   - [ ] LinkedIn
+
+### Issues
+
+- [ ] Determine minimal SpecFlow version to support
+  - I now got an error that my project has a lower SpecFlow version than this plugin, which then fails
+  - This is probably solved by a smart grep semver version thingy in package refs
+- [ ] Documentation should include that you need to create a Setup Class/Method [ScenarioDependencies]

@@ -15,6 +15,9 @@
 		<AssemblyName>SolidToken.SpecFlow.DependencyInjection.SpecFlowPlugin</AssemblyName>
 	</PropertyGroup>
 	<ItemGroup>
+		<None Include="build\**" Pack="True" PackagePath="build\" />
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="GitVersionTask" Version="4.0.1-beta1-65">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
