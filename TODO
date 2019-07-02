@@ -1,0 +1,24 @@
+☐ Make issue tracker available (1.0.0+)
+☐ Howto setup supporting services (git repo, ci/cd, nuget repo)
+    ☐ NuGet
+    ☐ Azure DevOps
+    ☐ GitHub
+☐ Streamline Release process based on GitHubFlow/Git Releases
+    Still prefer gitflow but let's stick with it
+☐ Code Quality
+    ☐ Add .editorconfig
+    ☐ Add source code quality guidelines
+    ✔ Add SourceLink @done(19-07-01)
+        https://devblogs.microsoft.com/nuget/introducing-source-code-link-for-nuget-packages/
+☐ Tests
+    ☐ Add tests for SpecFlow classes (ScenarioContext, FeatureContext, etc)
+    ☐ Add tests for parallel testing
+    ☐ Add tests for high-load testing
+        Test if we are properly disposing our plumbing code
+☐ Determine minimal SpecFlow version to support
+    I now got an error that my project has a lower SpecFlow version than this plugin, which then fails
+    This is probably solved by a smart grep semver version thingy in package refs
+✔ Documentation should include that you need to create a Setup Class/Method [ScenarioDependencies] @done(19-07-02)
+    ☐ Could also add a "AutoRegisterBindings" (default True) to [ScenarioDependencies]
+        This would auto-register all [Bindings] in the same assembly/namespce as the tagged method
+☐ Add ProjectUrl and Tags and Icon to NuGet package

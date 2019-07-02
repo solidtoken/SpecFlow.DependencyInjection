@@ -1,77 +1,51 @@
 # SpecFlow.DependencyInjection
 
-SpecFlow Plugin for Microsoft.Extensions.DependencyInjection
+SpecFlow plugin for using Microsoft.Extensions.DependencyInjection as a dependency injection framework for step definitions.
 
-Based on https://github.com/gasparnagy/SpecFlow.Autofac.
+Based on https://github.com/gasparnagy/SpecFlow.Autofac ([Apache License 2.0](https://github.com/gasparnagy/SpecFlow.Autofac/blob/master/LICENSE))
 
-## TODO
+Currently supports:
+* [SpecFlow v3.0](https://www.nuget.org/packages/SpecFlow/3.0)
+* [Microsoft.Extensions.DependencyInjection v2.2](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/2.2)
 
-Todo will move to GitHub Issues once 1.0.0 is released. For now this README will have to suffice.
-You can find me (@mbhoek) on https://gitter.im/techtalk/specflow-plugin-dev for questions and feedback.
+License: MIT (https://github.com/solidtoken/SpecFlow.DependencyInjection/blob/master/LICENSE)
 
-### Documentation
+NuGet: https://www.nuget.org/packages/SolidToken.SpecFlow.DependencyInjection
 
-- [ ] Proper README
-- [x] Add LICENSE
-- [ ] Make issue tracker available (1.0.0+)
-- [ ] Move TODO to TODO+ document?
-  - Too bad VS does not support TODO+ extension (it's VSCode only)
-- [ ] Howto setup services
-  - [ ] NuGet
-  - [ ] Azure DevOps
-  - [ ] GitHub
+## Usage
 
-### CI/CD
+Install plugin from NuGet into your SpecFlow project.
 
-- [x] Semantic versioning
-  - GitVersion Build Task
-- [x] GitHub workflow (?)
-  - https://guides.github.com/introduction/flow/
-  - Can't really get used to this, I prefer gitflow thus far
-  - Trying to stick to it just to learn
-- [x] CI -> Azure Pipelines
-  - [x] Build using Azure Pipelines
-  - [x] Smoke Test using the .Tests project
-- [ ] CD -> NuGet
-  - [x] Release a succesful build (gating?)
-  - [ ] Signed packages
-    - https://docs.microsoft.com/en-us/nuget/reference/signed-packages-reference
-    - I'd like to sign the release commits (in git) as well (tags?)
-    - Signed packages feels like a hassle with the Certification needed (and costs)
-    - Probably best delayed until it's a really popular package
-  - [ ] GitHub Releases? How and why?
-    - [x] Implement GitHub Release from Azure DevOps
-    - Still feels like you always need a manual step to release (vs GitFlow which allows you to auto-release)
+```powershell
+PM> Install-Package SolidToken.SpecFlow.DependencyInjection
+```
 
-### Code
+Create a static method somewhere in the SpecFlow project (recommended to put it into the ```Support``` folder) that returns an Microsoft.Extensions.DependencyInjection ```IServiceCollection``` and tag it with the `[ScenarioDependencies]` attribute. Configure your dependencies for the scenario execution within the method. You also have to register the step definition classes, that you can do by either registering all classes marked with the ```[Binding]``` attribute:
 
-- [x] Add .gitignore
-- [ ] Add .editorconfig
-- [ ] Add source code quality guidelines
-- [x] Add SourceLink 
-  - https://devblogs.microsoft.com/nuget/introducing-source-code-link-for-nuget-packages/
-- [x] Set Assembly metadata correctly
+```csharp
+foreach (var type in typeof(TestDependencies).Assembly.GetTypes().Where(t => Attribute.IsDefined(t, typeof(BindingAttribute))))
+{
+    services.AddSingleton(type);
+}
+```
 
-### Tests
+A typical dependency builder method probably looks like this:
 
-- [ ] Add tests for SpecFlow classes (ScenarioContext, FeatureContext, etc)
-- [ ] Add tests for parallel testing
-- [ ] Add tests for high-load testing
-  - Test if we are properly disposing our plumbing code
+```csharp
+[ScenarioDependencies]
+public static IServiceCollection CreateServices()
+{
+    var services = new ServiceCollection();
+    
+    // TODO: add customizations, stubs required for testing
 
-### Social
+    foreach (var type in typeof(TestDependencies).Assembly.GetTypes().Where(t => Attribute.IsDefined(t, typeof(BindingAttribute))))
+    {
+        services.AddSingleton(type);
+    }
 
-- [ ] Publish builds/releases on social networks
-  - [ ] Microsoft Teams
-  - [ ] Slack
-  - [ ] Twitter
-  - [ ] LinkedIn
+    return services;
+}
+```
 
-### Issues
-
-- [ ] Determine minimal SpecFlow version to support
-  - I now got an error that my project has a lower SpecFlow version than this plugin, which then fails
-  - This is probably solved by a smart grep semver version thingy in package refs
-- [ ] Documentation should include that you need to create a Setup Class/Method [ScenarioDependencies]
-  - [ ] Could also add a "AutoRegisterBindings" (default True) to [ScenarioDependencies]
-    - This would auto-register all [Bindings] in the same assembly/namespce as the tagged method
+Refer to ```SpecFlow.DependencyInjection.Tests``` for a typical implementation.
