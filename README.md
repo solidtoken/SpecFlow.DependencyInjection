@@ -1,6 +1,6 @@
 # SpecFlow.DependencyInjection
 
-SpecFlow plugin for using Microsoft.Extensions.DependencyInjection as a dependency injection framework for step definitions.
+SpecFlow plugin for using Microsoft.Extensions.DependencyInjection as dependency injection framework.
 
 Based on https://github.com/gasparnagy/SpecFlow.Autofac ([Apache License 2.0](https://github.com/gasparnagy/SpecFlow.Autofac/blob/master/LICENSE))
 
