@@ -2,8 +2,8 @@
 
 namespace SolidToken.SpecFlow.DependencyInjection
 {
-	[AttributeUsage(AttributeTargets.Method)]
-	public class ScenarioDependenciesAttribute : Attribute
-	{
-	}
+    [AttributeUsage(AttributeTargets.Method)]
+    public class ScenarioDependenciesAttribute : Attribute
+    {
+    }
 }
