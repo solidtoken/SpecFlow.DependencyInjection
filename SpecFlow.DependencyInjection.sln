@@ -7,9 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecFlow.DependencyInjectio
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F6B4EBE9-9995-403D-BC3F-AD26CD6E960F}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.gitignore = .gitignore
-		LICENSE = LICENSE
+		azure-pipelines.yml = azure-pipelines.yml
+		GitVersion.yml = GitVersion.yml
 		README.md = README.md
+		TODO = TODO
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecFlow.DependencyInjection.Tests", "SpecFlow.DependencyInjection.Tests\SpecFlow.DependencyInjection.Tests.csproj", "{927C1595-C4EB-4F05-91A7-D2B519B68076}"

@@ -6,22 +6,22 @@ using TechTalk.SpecFlow.Bindings.Reflection;
 
 namespace SolidToken.SpecFlow.DependencyInjection
 {
-	public static class BindingRegistryExtensions
-	{
-		public static IEnumerable<IBindingType> GetBindingTypes(this IBindingRegistry bindingRegistry)
-		{
-			return bindingRegistry.GetStepDefinitions().Cast<IBinding>()
-				.Concat(bindingRegistry.GetHooks().Cast<IBinding>())
-				.Concat(bindingRegistry.GetStepTransformations())
-				.Select(b => b.Method.Type)
-				.Distinct();
-		}
+    public static class BindingRegistryExtensions
+    {
+        public static IEnumerable<IBindingType> GetBindingTypes(this IBindingRegistry bindingRegistry)
+        {
+            return bindingRegistry.GetStepDefinitions().Cast<IBinding>()
+                .Concat(bindingRegistry.GetHooks().Cast<IBinding>())
+                .Concat(bindingRegistry.GetStepTransformations())
+                .Select(b => b.Method.Type)
+                .Distinct();
+        }
 
-		public static IEnumerable<Assembly> GetBindingAssemblies(this IBindingRegistry bindingRegistry)
-		{
-			return bindingRegistry.GetBindingTypes().OfType<RuntimeBindingType>()
-				.Select(t => t.Type.Assembly)
-				.Distinct();
-		}
-	}
+        public static IEnumerable<Assembly> GetBindingAssemblies(this IBindingRegistry bindingRegistry)
+        {
+            return bindingRegistry.GetBindingTypes().OfType<RuntimeBindingType>()
+                .Select(t => t.Type.Assembly)
+                .Distinct();
+        }
+    }
 }
