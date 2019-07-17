@@ -1,5 +1,10 @@
 # SpecFlow.DependencyInjection
 
+[![GitHub License](https://img.shields.io/github/license/solidtoken/SpecFlow.DependencyInjection.svg)](https://github.com/solidtoken/SpecFlow.DependencyInjection/blob/master/LICENSE) 
+[![GitHub Issues](https://img.shields.io/github/issues/solidtoken/SpecFlow.DependencyInjection.svg)](https://github.com/solidtoken/SpecFlow.DependencyInjection/issues) 
+[![Azure Build](https://img.shields.io/azure-devops/build/solidtoken/GitHub/8.svg)](https://solidtoken.visualstudio.com/GitHub/_build/latest?definitionId=8&branchName=master) 
+[![NuGet Package](https://img.shields.io/nuget/v/SolidToken.SpecFlow.DependencyInjection.svg)](https://www.nuget.org/packages/SolidToken.SpecFlow.DependencyInjection)
+
 SpecFlow plugin for using Microsoft.Extensions.DependencyInjection as a dependency injection framework.
 
 Based on https://github.com/gasparnagy/SpecFlow.Autofac ([Apache License 2.0](https://github.com/gasparnagy/SpecFlow.Autofac/blob/master/LICENSE))
@@ -7,10 +12,6 @@ Based on https://github.com/gasparnagy/SpecFlow.Autofac ([Apache License 2.0](ht
 Currently supports:
 * [SpecFlow v3.0](https://www.nuget.org/packages/SpecFlow/3.0)
 * [Microsoft.Extensions.DependencyInjection v2.2](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/2.2)
-
-License: MIT (https://github.com/solidtoken/SpecFlow.DependencyInjection/blob/master/LICENSE)
-
-NuGet: https://www.nuget.org/packages/SolidToken.SpecFlow.DependencyInjection
 
 ## Usage
 
