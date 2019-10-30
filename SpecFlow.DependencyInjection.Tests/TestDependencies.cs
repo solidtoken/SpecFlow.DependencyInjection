@@ -15,6 +15,9 @@ namespace SolidToken.SpecFlow.DependencyInjection.Tests
             // Add test dependencies
             services.AddTransient<ITestService, TestService>();
 
+            // ContextInjectionScope (by using AddScoped instead of AddTransient, the context will be scoped to the Feature across bindings)
+            services.AddScoped<TestContext>();
+
             // NOTE: This line is essential so that Microsoft.Extensions.DependencyInjection knows
             // about the SpecFlow bindings (something normally BoDi does automatically).
             // TODO: Find out if we can make this part of the Plugin
