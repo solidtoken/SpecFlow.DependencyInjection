@@ -21,13 +21,20 @@ steps:
   inputs:
     command: build
     arguments: '--configuration $(BuildConfiguration)'
-# Test
+# Test .NET Core 2.1
 - task: DotNetCoreCLI@2
-  displayName: Test
+  displayName: Test .NET Core 2.1
   inputs:
     command: test
     projects: '**/*.Tests/*.csproj'
-    arguments: '--configuration $(BuildConfiguration)'
+    arguments: '--configuration $(BuildConfiguration) --framework netcoreapp2.1'
+# Test .NET Core 3.1
+- task: DotNetCoreCLI@2
+  displayName: Test .NET Core 3.1
+  inputs:
+    command: test
+    projects: '**/*.Tests/*.csproj'
+    arguments: '--configuration $(BuildConfiguration) --framework netcoreapp3.1'
 # Pack
 - task: DotNetCoreCLI@2
   displayName: Pack
