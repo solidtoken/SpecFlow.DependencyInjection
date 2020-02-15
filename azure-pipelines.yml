@@ -6,8 +6,8 @@ variables:
 trigger:
 - master
 
-#pool:
-#  vmImage: 'ubuntu-latest'
+pool:
+  vmImage: 'windows-latest'
 
 steps:
 # Restore
