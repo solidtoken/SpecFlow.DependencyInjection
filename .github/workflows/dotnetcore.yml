@@ -12,10 +12,10 @@ jobs:
       with:
         fetch-depth: 0
 
-#    - name: Fetch master (for GitVersion)
-#      run: |
-#        git fetch --tags
-#        git branch --create-reflog master origin/master
+    - name: Fetch master (for GitVersion)
+      run: |
+        git fetch --tags
+        git branch --create-reflog master origin/master
           
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
