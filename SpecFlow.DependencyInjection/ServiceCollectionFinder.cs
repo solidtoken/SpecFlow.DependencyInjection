@@ -35,22 +35,31 @@ namespace SolidToken.SpecFlow.DependencyInjection
             {
                 foreach (var type in assembly.GetTypes())
                 {
-                    foreach (var methodInfo in type
-                        .GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
-                        .Where(m => Attribute.IsDefined((MemberInfo)m, typeof(ScenarioDependenciesAttribute))))
+                    foreach (var methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
                     {
-                        return () => GetServiceCollection(methodInfo, assembly);
+                        var scenarioDependenciesAttribute = (ScenarioDependenciesAttribute)Attribute.GetCustomAttribute(methodInfo, typeof(ScenarioDependenciesAttribute));
+
+                        if (scenarioDependenciesAttribute != null)
+                        {
+                            return () =>
+                            {
+                                var serviceCollection = GetServiceCollection(methodInfo);
+                                if (scenarioDependenciesAttribute.AutoRegisterBindings)
+                                {
+                                    AddBindingAttributes(assembly, serviceCollection);
+                                }
+                                return serviceCollection;
+                            };
+                        }
                     }
                 }
             }
             return null;
         }
 
-        private static IServiceCollection GetServiceCollection(MethodInfo methodInfo, Assembly assembly)
+        private static IServiceCollection GetServiceCollection(MethodBase methodInfo)
         {
-            var serviceCollection = (IServiceCollection)methodInfo.Invoke(null, null);
-            AddBindingAttributes(assembly, serviceCollection);
-            return serviceCollection;
+            return (IServiceCollection)methodInfo.Invoke(null, null);
         }
 
         private static void AddBindingAttributes(Assembly assembly, IServiceCollection serviceCollection)
