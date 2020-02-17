@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Bindings;
 
 namespace SolidToken.SpecFlow.DependencyInjection
@@ -38,11 +39,29 @@ namespace SolidToken.SpecFlow.DependencyInjection
                         .GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
                         .Where(m => Attribute.IsDefined((MemberInfo)m, typeof(ScenarioDependenciesAttribute))))
                     {
-                        return () => (IServiceCollection)methodInfo.Invoke(null, null);
+                        return GetServiceCollection(methodInfo, assembly);
                     }
                 }
             }
             return null;
+        }
+
+        private static Func<IServiceCollection> GetServiceCollection(MethodInfo methodInfo, Assembly assembly)
+        {
+            return () =>
+            {
+                var serviceCollection = (IServiceCollection)methodInfo.Invoke(null, null);
+                AddBindingAttributes(assembly, serviceCollection);
+                return serviceCollection;
+            };
+        }
+
+        private static void AddBindingAttributes(Assembly assembly, IServiceCollection serviceCollection)
+        {
+            foreach (var type in assembly.GetTypes().Where(t => Attribute.IsDefined(t, typeof(BindingAttribute))))
+            {
+                serviceCollection.AddSingleton(type);
+            }
         }
     }
 }
