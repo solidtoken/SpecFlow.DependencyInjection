@@ -39,21 +39,18 @@ namespace SolidToken.SpecFlow.DependencyInjection
                         .GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
                         .Where(m => Attribute.IsDefined((MemberInfo)m, typeof(ScenarioDependenciesAttribute))))
                     {
-                        return GetServiceCollection(methodInfo, assembly);
+                        return () => GetServiceCollection(methodInfo, assembly);
                     }
                 }
             }
             return null;
         }
 
-        private static Func<IServiceCollection> GetServiceCollection(MethodInfo methodInfo, Assembly assembly)
+        private static IServiceCollection GetServiceCollection(MethodInfo methodInfo, Assembly assembly)
         {
-            return () =>
-            {
-                var serviceCollection = (IServiceCollection)methodInfo.Invoke(null, null);
-                AddBindingAttributes(assembly, serviceCollection);
-                return serviceCollection;
-            };
+            var serviceCollection = (IServiceCollection)methodInfo.Invoke(null, null);
+            AddBindingAttributes(assembly, serviceCollection);
+            return serviceCollection;
         }
 
         private static void AddBindingAttributes(Assembly assembly, IServiceCollection serviceCollection)
