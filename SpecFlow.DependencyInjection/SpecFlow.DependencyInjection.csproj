@@ -1,22 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <PackageId>SolidToken.SpecFlow.DependencyInjection</PackageId>
     <Product>SpecFlow.DependencyInjection</Product>
-    <Description>SpecFlow plugin for using Microsoft.Extensions.DependencyInjection as a dependency injection framework.</Description>
+    <PackageId>SolidToken.SpecFlow.DependencyInjection</PackageId>
+    <RootNamespace>SolidToken.SpecFlow.DependencyInjection</RootNamespace>
+    <AssemblyName>SolidToken.SpecFlow.DependencyInjection.SpecFlowPlugin</AssemblyName>
+    <Description>SpecFlow plugin that enables to use Microsoft.Extensions.DependencyInjection for resolving test dependencies.</Description>
     <Authors>Solid Token</Authors>
     <Company>Solid Token</Company>
-    <Copyright>Copyright (c) Solid Token (https://www.solidtoken.nl)</Copyright>
+    <Copyright>Copyright © Solid Token</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/solidtoken/SpecFlow.DependencyInjection</PackageProjectUrl>
     <PackageIconUrl>https://avatars0.githubusercontent.com/u/413381</PackageIconUrl>
-    <PackageTags>microsoft;dependency-injection;specflow;specflow-plugin</PackageTags>
+    <PackageTags>microsoft;dependencyinjection;di;specflow;plugin</PackageTags>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <DebugType>Embedded</DebugType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/solidtoken/SpecFlow.DependencyInjection.git</RepositoryUrl>
-    <RootNamespace>SolidToken.SpecFlow.DependencyInjection</RootNamespace>
-    <AssemblyName>SolidToken.SpecFlow.DependencyInjection.SpecFlowPlugin</AssemblyName>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
     <None Include="build\**" Pack="True" PackagePath="build\" />
