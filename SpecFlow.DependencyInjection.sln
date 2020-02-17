@@ -20,6 +20,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecFlow.DependencyInjectio
 		{CACF906A-7230-4E37-984C-739AB1620995} = {CACF906A-7230-4E37-984C-739AB1620995}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecFlow.DependencyInjection.MSTest.Tests", "SpecFlow.DependencyInjection.MSTest.Tests\SpecFlow.DependencyInjection.MSTest.Tests.csproj", "{135867FC-F15C-4A32-AB0A-41F18CC320C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,10 @@ Global
 		{927C1595-C4EB-4F05-91A7-D2B519B68076}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{927C1595-C4EB-4F05-91A7-D2B519B68076}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{927C1595-C4EB-4F05-91A7-D2B519B68076}.Release|Any CPU.Build.0 = Release|Any CPU
+		{135867FC-F15C-4A32-AB0A-41F18CC320C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{135867FC-F15C-4A32-AB0A-41F18CC320C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{135867FC-F15C-4A32-AB0A-41F18CC320C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{135867FC-F15C-4A32-AB0A-41F18CC320C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
