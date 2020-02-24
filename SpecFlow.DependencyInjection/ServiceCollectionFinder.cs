@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Bindings;
 
 namespace SolidToken.SpecFlow.DependencyInjection
@@ -34,15 +35,39 @@ namespace SolidToken.SpecFlow.DependencyInjection
             {
                 foreach (var type in assembly.GetTypes())
                 {
-                    foreach (var methodInfo in type
-                        .GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
-                        .Where(m => Attribute.IsDefined((MemberInfo)m, typeof(ScenarioDependenciesAttribute))))
+                    foreach (var methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
                     {
-                        return () => (IServiceCollection)methodInfo.Invoke(null, null);
+                        var scenarioDependenciesAttribute = (ScenarioDependenciesAttribute)Attribute.GetCustomAttribute(methodInfo, typeof(ScenarioDependenciesAttribute));
+
+                        if (scenarioDependenciesAttribute != null)
+                        {
+                            return () =>
+                            {
+                                var serviceCollection = GetServiceCollection(methodInfo);
+                                if (scenarioDependenciesAttribute.AutoRegisterBindings)
+                                {
+                                    AddBindingAttributes(assembly, serviceCollection);
+                                }
+                                return serviceCollection;
+                            };
+                        }
                     }
                 }
             }
             return null;
+        }
+
+        private static IServiceCollection GetServiceCollection(MethodBase methodInfo)
+        {
+            return (IServiceCollection)methodInfo.Invoke(null, null);
+        }
+
+        private static void AddBindingAttributes(Assembly assembly, IServiceCollection serviceCollection)
+        {
+            foreach (var type in assembly.GetTypes().Where(t => Attribute.IsDefined(t, typeof(BindingAttribute))))
+            {
+                serviceCollection.AddSingleton(type);
+            }
         }
     }
 }
