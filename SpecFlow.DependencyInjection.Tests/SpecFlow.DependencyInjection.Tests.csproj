@@ -23,8 +23,8 @@
   <!-- .NET Core 3.1 LTS (always use latest applicable version) -->
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.1" />
-    <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.1.82" />
-    <PackageReference Include="SpecFlow.xUnit" Version="3.1.82" />
+    <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.1.86" />
+    <PackageReference Include="SpecFlow.xUnit" Version="3.1.86" />
   </ItemGroup>
   
   <ItemGroup>

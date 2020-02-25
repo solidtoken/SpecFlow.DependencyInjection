@@ -45,9 +45,6 @@ namespace SolidToken.SpecFlow.DependencyInjection
             };
         }
 
-        /// <summary>
-        /// Pass-through plumbing from Microsoft.Extensions.DependencyInjection to SpecFlow.BoDi.
-        /// </summary>
         private void RegisterSpecFlowDependencies(
             IObjectContainer objectContainer,
             IServiceCollection services)
