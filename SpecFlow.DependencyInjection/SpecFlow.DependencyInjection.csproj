@@ -5,7 +5,7 @@
     <PackageId>SolidToken.SpecFlow.DependencyInjection</PackageId>
     <RootNamespace>SolidToken.SpecFlow.DependencyInjection</RootNamespace>
     <AssemblyName>SolidToken.SpecFlow.DependencyInjection.SpecFlowPlugin</AssemblyName>
-    <Description>SpecFlow plugin that enables to use Microsoft.Extensions.DependencyInjection for resolving test dependencies.</Description>
+    <Description>SpecFlow plugin for using Microsoft.Extensions.DependencyInjection as a dependency injection framework for resolving test dependencies.</Description>
     <Authors>Solid Token</Authors>
     <Company>Solid Token</Company>
     <Copyright>Copyright © Solid Token</Copyright>

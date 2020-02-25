@@ -6,7 +6,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
     public class ScenarioDependenciesAttribute : Attribute
     {
         /// <summary>
-        /// Automatically register all SpecFlow bindings
+        /// Automatically register all SpecFlow bindings.
         /// </summary>
         public bool AutoRegisterBindings { get; set; } = true;
     }
