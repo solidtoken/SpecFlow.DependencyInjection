@@ -23,7 +23,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
             var services = createScenarioServiceCollection.Value;
             if (services == null)
             {
-                throw new Exception("Unable to find scenario dependencies! Mark a static method that returns a IServiceCollection with [ScenarioDependencies]!");
+                throw new MissingScenarioDependenciesException();
             }
             return services;
         }
