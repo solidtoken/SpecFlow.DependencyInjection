@@ -5,7 +5,7 @@
 [![Azure Build](https://img.shields.io/azure-devops/build/solidtoken/GitHub/8.svg)](https://solidtoken.visualstudio.com/GitHub/_build/latest?definitionId=8&branchName=master) 
 [![NuGet Package](https://img.shields.io/nuget/v/SolidToken.SpecFlow.DependencyInjection.svg)](https://www.nuget.org/packages/SolidToken.SpecFlow.DependencyInjection)
 
-SpecFlow plugin for using Microsoft.Extensions.DependencyInjection as a dependency injection framework for resolving test dependencies.
+SpecFlow plugin that enables to use Microsoft.Extensions.DependencyInjection for resolving test dependencies.
 
 Currently supports:
 * [SpecFlow v3.0 or above](https://www.nuget.org/packages/SpecFlow/3.0)
