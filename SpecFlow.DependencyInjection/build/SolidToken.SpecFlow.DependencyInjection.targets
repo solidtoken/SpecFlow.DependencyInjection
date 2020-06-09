@@ -1,7 +1,6 @@
 ﻿<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<_SpecFlow_DependencyInjectionPluginFramework Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">netstandard2.0</_SpecFlow_DependencyInjectionPluginFramework>
-		<_SpecFlow_DependencyInjectionPluginFramework Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">net45</_SpecFlow_DependencyInjectionPluginFramework>
+		<_SpecFlow_DependencyInjectionPluginFramework>netstandard2.0</_SpecFlow_DependencyInjectionPluginFramework>
 		<_SpecFlow_DependencyInjectionPluginPath>$(MSBuildThisFileDirectory)\..\lib\$(_SpecFlow_DependencyInjectionPluginFramework)\SolidToken.SpecFlow.DependencyInjection.SpecFlowPlugin.dll</_SpecFlow_DependencyInjectionPluginPath>
 	</PropertyGroup>
 </Project>
