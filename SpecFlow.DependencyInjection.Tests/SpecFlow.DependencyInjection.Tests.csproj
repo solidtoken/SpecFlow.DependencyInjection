@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp3.1;net472</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <RootNamespace>SolidToken.SpecFlow.DependencyInjection.Tests</RootNamespace>
     <AssemblyName>SolidToken.SpecFlow.DependencyInjection.Tests</AssemblyName>
@@ -12,19 +12,14 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" PrivateAssets="All" />
-  </ItemGroup>
-
-  <!-- .NET Core 2.1 LTS (always use lowest applicable version) -->
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.0.188" />
-    <PackageReference Include="SpecFlow.xUnit" Version="3.0.188" />
+    <PackageReference Include="SpecFlow" Version="3.3.22-beta" />
+    <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.3.22-beta" />
+    <PackageReference Include="SpecFlow.xUnit" Version="3.3.22-beta" />
   </ItemGroup>
 
   <!-- .NET Core 3.1 LTS (always use latest applicable version) -->
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.1" />
-    <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.1.86" />
-    <PackageReference Include="SpecFlow.xUnit" Version="3.1.86" />
   </ItemGroup>
   
   <ItemGroup>
