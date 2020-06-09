@@ -34,14 +34,12 @@ namespace SolidToken.SpecFlow.DependencyInjection
 
             runtimePluginEvents.CustomizeScenarioDependencies += (sender, args) =>
             {
-                args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
-                {
-                    var serviceCollectionFinder = args.ObjectContainer.Resolve<IServiceCollectionFinder>();
-                    var createScenarioServiceCollection = serviceCollectionFinder.GetCreateScenarioServiceCollection();
-                    var services = createScenarioServiceCollection();
-                    RegisterSpecFlowDependencies(args.ObjectContainer, services);
-                    return services.BuildServiceProvider();
-                });
+                var serviceCollectionFinder = args.ObjectContainer.Resolve<IServiceCollectionFinder>();
+                var createScenarioServiceCollection = serviceCollectionFinder.GetCreateScenarioServiceCollection();
+                var services = createScenarioServiceCollection();
+                RegisterSpecFlowDependencies(args.ObjectContainer, services);
+                var provider = services.BuildServiceProvider();
+                args.ObjectContainer.RegisterInstanceAs(provider, typeof(IServiceProvider), dispose: true);
             };
         }
 
