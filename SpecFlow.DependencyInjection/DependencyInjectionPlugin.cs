@@ -39,37 +39,85 @@ namespace SolidToken.SpecFlow.DependencyInjection
                     var serviceCollectionFinder = args.ObjectContainer.Resolve<IServiceCollectionFinder>();
                     var createScenarioServiceCollection = serviceCollectionFinder.GetCreateScenarioServiceCollection();
                     var services = createScenarioServiceCollection();
-                    RegisterSpecFlowDependencies(args.ObjectContainer, services);
+
+                    RegisterObjectContainer(args.ObjectContainer, services);
+                    RegisterScenarioSpecFlowDependencies(services);
+                    RegisterFeatureSpecFlowDependencies(services);
+                    RegisterTestThreadSpecFlowDependencies(services);
+
+                    return services.BuildServiceProvider();
+                });
+            };
+
+            runtimePluginEvents.CustomizeFeatureDependencies += (sender, args) =>
+            {
+                args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
+                {
+                    var serviceCollectionFinder = args.ObjectContainer.Resolve<IServiceCollectionFinder>();
+                    var createScenarioServiceCollection = serviceCollectionFinder.GetCreateScenarioServiceCollection();
+                    var services = createScenarioServiceCollection();
+
+                    RegisterObjectContainer(args.ObjectContainer, services);
+                    RegisterFeatureSpecFlowDependencies(services);
+                    RegisterTestThreadSpecFlowDependencies(services);
+
+                    return services.BuildServiceProvider();
+                });
+            };
+
+            runtimePluginEvents.CustomizeTestThreadDependencies += (sender, args) =>
+            {
+                args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
+                {
+                    var serviceCollectionFinder = args.ObjectContainer.Resolve<IServiceCollectionFinder>();
+                    var createScenarioServiceCollection = serviceCollectionFinder.GetCreateScenarioServiceCollection();
+                    var services = createScenarioServiceCollection();
+
+                    RegisterObjectContainer(args.ObjectContainer, services);
+                    RegisterTestThreadSpecFlowDependencies(services);
+
                     return services.BuildServiceProvider();
                 });
             };
         }
 
-        private void RegisterSpecFlowDependencies(
+        private static void RegisterObjectContainer(
             IObjectContainer objectContainer,
             IServiceCollection services)
         {
-            services.AddTransient<IObjectContainer>(ctx =>
-            {
-                return objectContainer;
-            });
+            services.AddTransient<IObjectContainer>(ctx => objectContainer);
+        }
+
+        private static void RegisterScenarioSpecFlowDependencies(
+            IServiceCollection services)
+        {
             services.AddTransient<ScenarioContext>(ctx =>
             {
                 var specflowContainer = ctx.GetService<IObjectContainer>();
                 var scenarioContext = specflowContainer.Resolve<ScenarioContext>();
                 return scenarioContext;
             });
+        }
+
+        private static void RegisterFeatureSpecFlowDependencies(
+            IServiceCollection services)
+        {
             services.AddTransient<FeatureContext>(ctx =>
             {
                 var specflowContainer = ctx.GetService<IObjectContainer>();
-                var scenarioContext = specflowContainer.Resolve<FeatureContext>();
-                return scenarioContext;
+                var featureContext = specflowContainer.Resolve<FeatureContext>();
+                return featureContext;
             });
+        }
+
+        private static void RegisterTestThreadSpecFlowDependencies(
+            IServiceCollection services)
+        {
             services.AddTransient<TestThreadContext>(ctx =>
             {
                 var specflowContainer = ctx.GetService<IObjectContainer>();
-                var scenarioContext = specflowContainer.Resolve<TestThreadContext>();
-                return scenarioContext;
+                var testThreadContext = specflowContainer.Resolve<TestThreadContext>();
+                return testThreadContext;
             });
         }
     }
