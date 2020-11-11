@@ -8,8 +8,8 @@
 SpecFlow plugin that enables to use Microsoft.Extensions.DependencyInjection for resolving test dependencies.
 
 Currently supports:
-* [SpecFlow v3.0 or above](https://www.nuget.org/packages/SpecFlow/3.0)
-* [Microsoft.Extensions.DependencyInjection v2.1 or above](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/2.1)
+* [SpecFlow v3.3.30 or later](https://www.nuget.org/packages/SpecFlow/3.3.30)
+* [Microsoft.Extensions.DependencyInjection v3.1.5 or later](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/3.1.5)
 
 Listed on [Available Plugins for SpecFlow](https://specflow.org/documentation/Available-Plugins/).
 Based on https://github.com/gasparnagy/SpecFlow.Autofac (now [part of SpecFlow](https://github.com/SpecFlowOSS/SpecFlow/tree/master/Plugins/SpecFlow.Autofac.SpecFlowPlugin)).
