@@ -10,40 +10,40 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-# Restore
 - task: DotNetCoreCLI@2
   displayName: Restore
   inputs:
     command: restore
-# Build .NET Standard 2.0
 - task: DotNetCoreCLI@2
   displayName: Build
   inputs:
     command: build
     projects: 'SpecFlow.DependencyInjection'
     arguments: '--configuration $(BuildConfiguration)'
-# Test .NET Core 2.1
+- task: DotNetCoreCLI@2
+  displayName: Test .NET Framework 4.6.1
+  inputs:
+    command: test
+    projects: 'SpecFlow.DependencyInjection.Tests'
+    arguments: '--configuration $(BuildConfiguration) --framework net461'
 - task: DotNetCoreCLI@2
   displayName: Test .NET Core 2.1
   inputs:
     command: test
     projects: 'SpecFlow.DependencyInjection.Tests'
     arguments: '--configuration $(BuildConfiguration) --framework netcoreapp2.1'
-# Test .NET Core 3.1
 - task: DotNetCoreCLI@2
   displayName: Test .NET Core 3.1
   inputs:
     command: test
     projects: 'SpecFlow.DependencyInjection.Tests'
     arguments: '--configuration $(BuildConfiguration) --framework netcoreapp3.1'
-# Pack output of Build command
 - task: DotNetCoreCLI@2
   displayName: Pack
   inputs:
     command: pack
     packagesToPack: 'SpecFlow.DependencyInjection'
     nobuild: true
-# Publish
 - task: PublishBuildArtifacts@1
   displayName: Publish
   inputs:
