@@ -9,7 +9,7 @@
     <Authors>Solid Token</Authors>
     <Company>Solid Token</Company>
     <Copyright>Copyright © Solid Token</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/solidtoken/SpecFlow.DependencyInjection</PackageProjectUrl>
     <PackageIconUrl>https://avatars0.githubusercontent.com/u/413381</PackageIconUrl>
     <PackageTags>microsoft;dependencyinjection;di;specflow;plugin</PackageTags>
