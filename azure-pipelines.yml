@@ -4,7 +4,7 @@ variables:
   BuildConfiguration: Release
   
 trigger:
-- master
+- main
 
 pool:
   vmImage: 'windows-latest'

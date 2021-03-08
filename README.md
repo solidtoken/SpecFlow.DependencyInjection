@@ -1,8 +1,8 @@
 # SpecFlow.DependencyInjection
 
-[![GitHub License](https://img.shields.io/github/license/solidtoken/SpecFlow.DependencyInjection.svg)](https://github.com/solidtoken/SpecFlow.DependencyInjection/blob/master/LICENSE) 
+[![GitHub License](https://img.shields.io/github/license/solidtoken/SpecFlow.DependencyInjection.svg)](https://github.com/solidtoken/SpecFlow.DependencyInjection/blob/main/LICENSE) 
 [![GitHub Issues](https://img.shields.io/github/issues/solidtoken/SpecFlow.DependencyInjection.svg)](https://github.com/solidtoken/SpecFlow.DependencyInjection/issues) 
-[![Azure Build](https://img.shields.io/azure-devops/build/solidtoken/GitHub/8.svg)](https://solidtoken.visualstudio.com/GitHub/_build/latest?definitionId=8&branchName=master) 
+[![Azure Build](https://img.shields.io/azure-devops/build/solidtoken/GitHub/8.svg)](https://solidtoken.visualstudio.com/GitHub/_build/latest?definitionId=8&branchName=main) 
 [![NuGet Package](https://img.shields.io/nuget/v/SolidToken.SpecFlow.DependencyInjection.svg)](https://www.nuget.org/packages/SolidToken.SpecFlow.DependencyInjection)
 
 SpecFlow plugin that enables to use Microsoft.Extensions.DependencyInjection for resolving test dependencies.
