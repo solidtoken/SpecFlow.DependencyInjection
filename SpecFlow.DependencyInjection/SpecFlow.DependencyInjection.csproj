@@ -13,12 +13,16 @@
     <PackageProjectUrl>https://github.com/solidtoken/SpecFlow.DependencyInjection</PackageProjectUrl>
     <PackageIconUrl>https://avatars0.githubusercontent.com/u/413381</PackageIconUrl>
     <PackageTags>microsoft;dependencyinjection;di;specflow;plugin</PackageTags>
+    
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <DebugType>Embedded</DebugType>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GitVersionTask" Version="5.5.0" PrivateAssets="All" />
+    <PackageReference Include="GitVersion.MsBuild" Version="5.6.6">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.5" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="SpecFlow" Version="3.3.30" />
