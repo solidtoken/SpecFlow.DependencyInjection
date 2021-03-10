@@ -1,5 +1,11 @@
-assembly-versioning-scheme: MajorMinorPatchTag
 mode: Mainline
-branches: {}
-ignore:
-  sha: []
+assembly-versioning-scheme: MajorMinorPatch
+assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{env:BUILD_BUILDID ?? 0}'
+assembly-informational-format: '{SemVer}+{ShortSha}'
+branches:
+  main:
+    regex: ^main$
+  develop:
+    regex: ^dev$
+  pull-request:
+    tag: pr

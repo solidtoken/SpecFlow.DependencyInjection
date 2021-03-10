@@ -6,19 +6,33 @@
     <RootNamespace>SolidToken.SpecFlow.DependencyInjection</RootNamespace>
     <AssemblyName>SolidToken.SpecFlow.DependencyInjection.SpecFlowPlugin</AssemblyName>
     <Description>SpecFlow plugin that enables to use Microsoft.Extensions.DependencyInjection for resolving test dependencies.</Description>
+
     <Authors>Solid Token</Authors>
     <Company>Solid Token</Company>
     <Copyright>Copyright © Solid Token</Copyright>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageIconUrl>https://avatars0.githubusercontent.com/u/413381</PackageIconUrl>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/solidtoken/SpecFlow.DependencyInjection</PackageProjectUrl>
-    <PackageIconUrl>https://avatars0.githubusercontent.com/u/413381</PackageIconUrl>
     <PackageTags>microsoft;dependencyinjection;di;specflow;plugin</PackageTags>
+
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <DebugType>Embedded</DebugType>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GitVersionTask" Version="5.5.0" PrivateAssets="All" />
+    <None Include="icon.png" Pack="true" Visible="false" PackagePath="" />
+    <None Include="../LICENSE" Pack="true" Visibile="false" PackagePath="" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild" Version="5.6.6">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.5" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="SpecFlow" Version="3.3.30" />
