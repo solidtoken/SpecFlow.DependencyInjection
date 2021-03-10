@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Product>SpecFlow.DependencyInjection</Product>
     <PackageId>SolidToken.SpecFlow.DependencyInjection</PackageId>
     <RootNamespace>SolidToken.SpecFlow.DependencyInjection</RootNamespace>
@@ -10,8 +10,7 @@
     <Authors>Solid Token</Authors>
     <Company>Solid Token</Company>
     <Copyright>Copyright © Solid Token</Copyright>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageIconUrl>https://avatars0.githubusercontent.com/u/413381</PackageIconUrl>
+    <PackageIcon>assets/icon.png</PackageIcon>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/solidtoken/SpecFlow.DependencyInjection</PackageProjectUrl>
     <PackageTags>microsoft;dependencyinjection;di;specflow;plugin</PackageTags>
@@ -25,8 +24,9 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="icon.png" Pack="true" Visible="false" PackagePath="" />
     <None Include="../LICENSE" Pack="true" Visible="false" PackagePath="" />
+    <None Include="assets/icon.png" Pack="true" Visible="true" PackagePath="assets/" />
+    <None Include="build/*" Pack="true" Visible="true" PackagePath="build/" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GitVersion.MsBuild" Version="5.6.6">
