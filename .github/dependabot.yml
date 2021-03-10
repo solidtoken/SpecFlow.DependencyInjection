@@ -3,6 +3,7 @@
 version: 2
 updates:
   - package-ecosystem: "nuget"
-    directory: "/SpecFlow.DependencyInjection" # Library
+    directory: "SpecFlow.DependencyInjection" # Library
     schedule:
       interval: "daily"
+    target-branch: "dev"
