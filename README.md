@@ -7,7 +7,7 @@
 
 SpecFlow plugin that enables to use Microsoft.Extensions.DependencyInjection for resolving test dependencies.
 
-Currently supports:
+Follows [SpecFlow versioning](https://specflow.org/blog/we-are-simplifying-our-specflow-and-net-version-support/) and currently targets:
 * [SpecFlow v3.5.5 or later](https://www.nuget.org/packages/SpecFlow/3.5.5)
 * [Microsoft.Extensions.DependencyInjection v5.0.0 or later](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/5.0.0)
 
