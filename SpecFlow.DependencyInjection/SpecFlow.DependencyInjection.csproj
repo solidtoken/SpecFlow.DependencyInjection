@@ -6,18 +6,24 @@
     <RootNamespace>SolidToken.SpecFlow.DependencyInjection</RootNamespace>
     <AssemblyName>SolidToken.SpecFlow.DependencyInjection.SpecFlowPlugin</AssemblyName>
     <Description>SpecFlow plugin that enables to use Microsoft.Extensions.DependencyInjection for resolving test dependencies.</Description>
+
     <Authors>Solid Token</Authors>
     <Company>Solid Token</Company>
     <Copyright>Copyright © Solid Token</Copyright>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageIconUrl>https://avatars0.githubusercontent.com/u/413381</PackageIconUrl>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/solidtoken/SpecFlow.DependencyInjection</PackageProjectUrl>
-    <PackageIconUrl>https://avatars0.githubusercontent.com/u/413381</PackageIconUrl>
     <PackageTags>microsoft;dependencyinjection;di;specflow;plugin</PackageTags>
-    
+
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="icon.png" Pack="true" Visible="false" PackagePath="" />
+    <None Include="../LICENSE" Pack="true" Visibile="false" PackagePath="" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GitVersion.MsBuild" Version="5.6.6">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
