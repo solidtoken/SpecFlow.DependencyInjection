@@ -1,14 +1,22 @@
 # Azure Pipelines Template for NuGet Packages
-# Copyright © Solid Token (https://www.solidtoken.nl)
+# Copyright Â© Solid Token (https://www.solidtoken.nl)
 
 variables:
-  ProjectName: 'SpecFlow.DependencyInjection'
-  TestProjectName: 'SpecFlow.DependencyInjection.Tests'
-  NuGetPackageName: 'SolidToken.SpecFlow.DependencyInjection'
-  NuGetDescription: 'SpecFlow plugin that enables to use Microsoft.Extensions.DependencyInjection for resolving test dependencies.'
-  BuildConfiguration: 'Release'
-  GitHubConnection: 'Solid Token GitHub'
-  NuGetConnection: 'Solid Token NuGet'
+- name: ProjectName
+  value: 'SpecFlow.DependencyInjection'
+- name: TestProjectName
+  value: 'SpecFlow.DependencyInjection.Tests'
+- name: NuGetPackageName
+  value: 'SolidToken.SpecFlow.DependencyInjection'
+- name: NuGetDescription
+  value: 'SpecFlow plugin that enables to use Microsoft.Extensions.DependencyInjection for resolving test dependencies.'
+- name: BuildConfiguration
+  value: 'Release'
+- name: GitHubConnection
+  value: 'Solid Token GitHub'
+- name: NuGetConnection
+  value: 'Solid Token NuGet'
+- group: CodeSigning
 
 trigger:
 - main
@@ -65,10 +73,32 @@ stages:
       NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
     steps:
+    - task: DotNetCoreCLI@2
+      displayName: 'Prepare'
+      inputs:
+        command: 'custom'
+        custom: 'tool'
+        arguments: 'install --tool-path . NuGetKeyVaultSignTool'
     - task: DownloadPipelineArtifact@2
+      displayName: 'Download'
       inputs:
         artifactName: '$(ProjectName)'
+    - task: PowerShell@2
+      displayName: 'Sign'
+      inputs:
+        targetType: 'inline'
+        script: |
+          .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)/*.nupkg `
+          --file-digest "sha256" `
+          --timestamp-rfc3161 "http://timestamp.sectigo.com" `
+          --timestamp-digest "sha256" `
+          --azure-key-vault-url "$(azure-key-vault-url)" `
+          --azure-key-vault-tenant-id "$(azure-key-vault-tenant-id)" `
+          --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
+          --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
+          --azure-key-vault-certificate "$(azure-key-vault-certificate)"
     - task: NuGetCommand@2
+      displayName: 'Push'
       inputs:
         command: 'push'
         packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
@@ -76,17 +106,18 @@ stages:
         publishFeedCredentials: '$(NuGetConnection)'
         includeSymbols: true
     - task: GitHubRelease@1
+      displayName: 'Release'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
         repositoryName: '$(Build.Repository.Name)'
         action: 'edit'
-        tagSource: 'manual'
         target: '$(Build.SourceVersion)'
+        tagSource: 'userSpecifiedTag'
         tag: 'v$(SemVer)'
         title: 'v$(FullSemVer)'
         assets: '$(Pipeline.Workspace)/*'
-        releaseNotesSource: 'input'
-        releaseNotes: |
+        releaseNotesSource: 'inline'
+        releaseNotesInline: |
           $(NuGetDescription)
           https://www.nuget.org/packages/$(NuGetPackageName)/$(NuGetVersion)
 
