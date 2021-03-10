@@ -9,4 +9,4 @@ branches:
     regex: ^dev$
   pull-request:
     tag: pr
-next-version: 3.6
+next-version: 3.7

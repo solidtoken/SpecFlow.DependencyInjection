@@ -8,7 +8,7 @@
 SpecFlow plugin that enables to use Microsoft.Extensions.DependencyInjection for resolving test dependencies.
 
 Follows [SpecFlow versioning](https://specflow.org/blog/we-are-simplifying-our-specflow-and-net-version-support/) and currently targets:
-* [SpecFlow v3.6.23 or later](https://www.nuget.org/packages/SpecFlow/3.6.23)
+* [SpecFlow v3.7.13 or later](https://www.nuget.org/packages/SpecFlow/3.7.13)
 * [Microsoft.Extensions.DependencyInjection v5.0.1 or later](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/5.0.1)
 
 Based on [SpecFlow.Autofac](https://github.com/gasparnagy/SpecFlow.Autofac).
