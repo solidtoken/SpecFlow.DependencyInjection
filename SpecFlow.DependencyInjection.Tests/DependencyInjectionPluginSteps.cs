@@ -6,17 +6,17 @@ namespace SolidToken.SpecFlow.DependencyInjection.Tests
     [Binding]
     public class DependencyInjectionPluginSteps
     {
-        private readonly ITestService testService;
+        private readonly ITestService _testService;
 
         public DependencyInjectionPluginSteps(ITestService testService)
         {
-            this.testService = testService;
+            _testService = testService;
         }
 
         [Then(@"verify that TestService is correctly injected")]
         public void ThenVerifyThatTestServiceIsCorrectlyInjected()
         {
-            Assert.True(testService.Verify());
+            Assert.True(_testService.Verify());
         }
     }
 
