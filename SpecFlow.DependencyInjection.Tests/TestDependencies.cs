@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace SolidToken.SpecFlow.DependencyInjection.Tests
@@ -16,6 +15,9 @@ namespace SolidToken.SpecFlow.DependencyInjection.Tests
 
             // ContextInjectionScope (by using AddScoped instead of AddTransient, the context will be scoped to the Feature across bindings)
             services.AddScoped<TestContext>();
+
+            // IAsyncDisposable
+            services.AddTransient<IAsyncDisposable, AsyncDisposableService>();
 
             return services;
         }
