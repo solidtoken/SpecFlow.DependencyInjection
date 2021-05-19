@@ -7,5 +7,7 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    allow:
+      - dependency-name: "SpecFlow"
     reviewers:
       - "solidtoken/opensource"
