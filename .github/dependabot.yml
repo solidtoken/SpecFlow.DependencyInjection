@@ -9,6 +9,5 @@ updates:
       interval: "daily"
     allow:
       - dependency-name: "SpecFlow"
-      - dependency-name: "SpecFlow.xUnit"
     reviewers:
       - "solidtoken/opensource"
