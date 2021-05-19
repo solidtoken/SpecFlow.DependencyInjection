@@ -7,3 +7,5 @@ updates:
     directory: "SpecFlow.DependencyInjection"
     schedule:
       interval: "daily"
+    reviewers:
+      - "solidtoken/opensource"
