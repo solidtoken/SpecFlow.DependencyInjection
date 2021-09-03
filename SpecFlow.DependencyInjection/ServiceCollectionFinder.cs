@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,7 +47,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
                                 var serviceCollection = GetServiceCollection(methodInfo);
                                 if (scenarioDependenciesAttribute.AutoRegisterBindings)
                                 {
-                                    AddBindingAttributes(assembly, serviceCollection);
+                                    AddBindingAttributes(assemblies, serviceCollection);
                                 }
                                 return serviceCollection;
                             };
@@ -62,11 +63,14 @@ namespace SolidToken.SpecFlow.DependencyInjection
             return (IServiceCollection)methodInfo.Invoke(null, null);
         }
 
-        private static void AddBindingAttributes(Assembly assembly, IServiceCollection serviceCollection)
+        private static void AddBindingAttributes(IEnumerable<Assembly> bindingAssemblies, IServiceCollection serviceCollection)
         {
-            foreach (var type in assembly.GetTypes().Where(t => Attribute.IsDefined(t, typeof(BindingAttribute))))
+            foreach(var assembly in bindingAssemblies)
             {
-                serviceCollection.AddSingleton(type);
+                foreach (var type in assembly.GetTypes().Where(t => Attribute.IsDefined(t, typeof(BindingAttribute))))
+                {
+                    serviceCollection.AddSingleton(type);
+                }
             }
         }
     }
