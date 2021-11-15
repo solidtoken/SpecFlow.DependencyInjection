@@ -11,10 +11,11 @@
     <Company>Solid Token</Company>
     <Copyright>Copyright © Solid Token</Copyright>
     <PackageIcon>assets/icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/solidtoken/SpecFlow.DependencyInjection</PackageProjectUrl>
     <PackageTags>microsoft;dependencyinjection;di;specflow;plugin</PackageTags>
-
+    
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -24,6 +25,7 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="../README.md" Pack="true" Visible="false" PackagePath="" />
     <None Include="../LICENSE" Pack="true" Visible="false" PackagePath="" />
     <None Include="assets/icon.png" Pack="true" Visible="true" PackagePath="assets/" />
     <None Include="build/*" Pack="true" Visible="true" PackagePath="build/" />
