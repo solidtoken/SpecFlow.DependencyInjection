@@ -21,6 +21,9 @@ variables:
 trigger:
 - main
 
+pool:
+  vmImage: 'ubuntu-latest'
+    
 stages:
 - stage: CI
   jobs:
