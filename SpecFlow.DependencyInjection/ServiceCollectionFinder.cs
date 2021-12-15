@@ -11,26 +11,18 @@ namespace SolidToken.SpecFlow.DependencyInjection
     public class ServiceCollectionFinder : IServiceCollectionFinder
     {
         private readonly IBindingRegistry bindingRegistry;
-        private readonly Lazy<Func<IServiceCollection>> createScenarioServiceCollection;
-
+        private (IServiceCollection, ScopeLevelType) _cache;
+        
         public ServiceCollectionFinder(IBindingRegistry bindingRegistry)
         {
             this.bindingRegistry = bindingRegistry;
-            createScenarioServiceCollection = new Lazy<Func<IServiceCollection>>(FindCreateScenarioServiceCollection, true);
         }
 
-        public Func<IServiceCollection> GetCreateScenarioServiceCollection()
+        public (IServiceCollection, ScopeLevelType) GetServiceCollection()
         {
-            var services = createScenarioServiceCollection.Value;
-            if (services == null)
-            {
-                throw new MissingScenarioDependenciesException();
-            }
-            return services;
-        }
-
-        protected virtual Func<IServiceCollection> FindCreateScenarioServiceCollection()
-        {
+            if (_cache != default)
+                return _cache;
+            
             var assemblies = bindingRegistry.GetBindingAssemblies();
             foreach (var assembly in assemblies)
             {
@@ -42,21 +34,19 @@ namespace SolidToken.SpecFlow.DependencyInjection
 
                         if (scenarioDependenciesAttribute != null)
                         {
-                            return () =>
+                            var serviceCollection = GetServiceCollection(methodInfo);
+                            if (scenarioDependenciesAttribute.AutoRegisterBindings)
                             {
-                                var serviceCollection = GetServiceCollection(methodInfo);
-                                if (scenarioDependenciesAttribute.AutoRegisterBindings)
-                                {
-                                    AddBindingAttributes(assemblies, serviceCollection);
-                                }
-                                return serviceCollection;
-                            };
+                                AddBindingAttributes(assemblies, serviceCollection);
+                            }
+                            return _cache = (serviceCollection, scenarioDependenciesAttribute.ScopeLevel);
                         }
                     }
                 }
             }
-            return null;
+            throw new MissingScenarioDependenciesException();
         }
+
 
         private static IServiceCollection GetServiceCollection(MethodBase methodInfo)
         {
@@ -69,7 +59,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
             {
                 foreach (var type in assembly.GetTypes().Where(t => Attribute.IsDefined(t, typeof(BindingAttribute))))
                 {
-                    serviceCollection.AddSingleton(type);
+                    serviceCollection.AddScoped(type);
                 }
             }
         }

@@ -5,6 +5,6 @@ namespace SolidToken.SpecFlow.DependencyInjection
 {
     public interface IServiceCollectionFinder
     {
-        Func<IServiceCollection> GetCreateScenarioServiceCollection();
+        (IServiceCollection, ScopeLevelType) GetServiceCollection();
     }
 }

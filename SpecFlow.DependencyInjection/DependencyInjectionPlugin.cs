@@ -1,9 +1,16 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using BoDi;
 using Microsoft.Extensions.DependencyInjection;
 using TechTalk.SpecFlow;
+using TechTalk.SpecFlow.Bindings;
+using TechTalk.SpecFlow.Bindings.Discovery;
+using TechTalk.SpecFlow.BindingSkeletons;
+using TechTalk.SpecFlow.Configuration;
+using TechTalk.SpecFlow.ErrorHandling;
 using TechTalk.SpecFlow.Infrastructure;
 using TechTalk.SpecFlow.Plugins;
+using TechTalk.SpecFlow.Tracing;
 using TechTalk.SpecFlow.UnitTestProvider;
 
 [assembly: RuntimePlugin(typeof(SolidToken.SpecFlow.DependencyInjection.DependencyInjectionPlugin))]
@@ -12,113 +19,174 @@ namespace SolidToken.SpecFlow.DependencyInjection
 {
     public class DependencyInjectionPlugin : IRuntimePlugin
     {
-        private readonly object registrationLock = new object();
+        private static readonly ConcurrentDictionary<IServiceProvider, IContextManager> BindMapping =
+            new ConcurrentDictionary<IServiceProvider, IContextManager>();
+        
+        private static readonly ConcurrentDictionary<ISpecFlowContext, IServiceScope> ActiveServiceScopes =
+            new ConcurrentDictionary<ISpecFlowContext, IServiceScope>();
 
+        private readonly object _registrationLock = new object();
+        
         public void Initialize(RuntimePluginEvents runtimePluginEvents, RuntimePluginParameters runtimePluginParameters, UnitTestProviderConfiguration unitTestProviderConfiguration)
         {
-            runtimePluginEvents.CustomizeGlobalDependencies += (sender, args) =>
+            runtimePluginEvents.CustomizeGlobalDependencies += CustomizeGlobalDependencies;
+            runtimePluginEvents.CustomizeFeatureDependencies += CustomizeFeatureDependenciesEventHandler;
+            runtimePluginEvents.CustomizeScenarioDependencies += CustomizeScenarioDependenciesEventHandler;
+        }
+
+        private void CustomizeGlobalDependencies(object sender, CustomizeGlobalDependenciesEventArgs args)
+        {
+            if (!args.ObjectContainer.IsRegistered<IServiceCollectionFinder>())
             {
-                if (!args.ObjectContainer.IsRegistered<IServiceCollectionFinder>())
+                lock (_registrationLock)
                 {
-                    lock (registrationLock)
+                    if (!args.ObjectContainer.IsRegistered<IServiceCollectionFinder>())
                     {
-                        if (!args.ObjectContainer.IsRegistered<IServiceCollectionFinder>())
-                        {
-                            args.ObjectContainer.RegisterTypeAs<DependencyInjectionTestObjectResolver, ITestObjectResolver>();
-                            args.ObjectContainer.RegisterTypeAs<ServiceCollectionFinder, IServiceCollectionFinder>();
-                        }
+                        args.ObjectContainer.RegisterTypeAs<DependencyInjectionTestObjectResolver, ITestObjectResolver>();
+                        args.ObjectContainer.RegisterTypeAs<ServiceCollectionFinder, IServiceCollectionFinder>();
                     }
-                    args.ObjectContainer.Resolve<IServiceCollectionFinder>();
+
+                    // We store the service provider in the global container, we create it only once
+                    // It must be lazy (hence factory) because at this point we still don't have the bindings mapped.
+                    args.ObjectContainer.RegisterFactoryAs<RootServiceProviderContainer>(() =>
+                    {
+                        var serviceCollectionFinder = args.ObjectContainer.Resolve<IServiceCollectionFinder>();
+                        var (services, scoping) = serviceCollectionFinder.GetServiceCollection();
+
+                        RegisterProxyBindings(args.ObjectContainer, services);
+                        return new RootServiceProviderContainer(services.BuildServiceProvider(), scoping);
+                    });
+
+                    args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
+                    {
+                        return args.ObjectContainer.Resolve<RootServiceProviderContainer>().ServiceProvider;
+                    });
+
+                    // Will make sure DI scope is disposed.
+                    var lcEvents = args.ObjectContainer.Resolve<RuntimePluginTestExecutionLifecycleEvents>();
+                    lcEvents.AfterScenario += AfterScenarioPluginLifecycleEventHandler;
+                    lcEvents.AfterFeature += AfterFeaturePluginLifecycleEventHandler;
                 }
-            };
+                args.ObjectContainer.Resolve<IServiceCollectionFinder>();
+            }
+        }
+        
+        private static void CustomizeFeatureDependenciesEventHandler(object sender, CustomizeFeatureDependenciesEventArgs args)
+        {
+            // At this point we have the bindings, we can resolve the service provider, which will build it if it's the first time.
+            var spContainer = args.ObjectContainer.Resolve<RootServiceProviderContainer>();
 
-            runtimePluginEvents.CustomizeScenarioDependencies += (sender, args) =>
+            if (spContainer.Scoping == ScopeLevelType.Feature)
             {
+                var serviceProvider = spContainer.ServiceProvider;
+
+                // Now we can register a new scoped service provider
                 args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
                 {
-                    var serviceCollectionFinder = args.ObjectContainer.Resolve<IServiceCollectionFinder>();
-                    var createScenarioServiceCollection = serviceCollectionFinder.GetCreateScenarioServiceCollection();
-                    var services = createScenarioServiceCollection();
-
-                    RegisterObjectContainer(args.ObjectContainer, services);
-                    RegisterScenarioSpecFlowDependencies(services);
-                    RegisterFeatureSpecFlowDependencies(services);
-                    RegisterTestThreadSpecFlowDependencies(services);
-
-                    return services.BuildServiceProvider();
+                    var scope = serviceProvider.CreateScope();
+                    BindMapping.TryAdd(scope.ServiceProvider, args.ObjectContainer.Resolve<IContextManager>());
+                    ActiveServiceScopes.TryAdd(args.ObjectContainer.Resolve<FeatureContext>(), scope);
+                    return scope.ServiceProvider;
                 });
-            };
+            }
+        }
 
-            runtimePluginEvents.CustomizeFeatureDependencies += (sender, args) =>
+        private static void CustomizeScenarioDependenciesEventHandler(object sender, CustomizeScenarioDependenciesEventArgs args)
+        {
+            // At this point we have the bindings, we can resolve the service provider, which will build it if it's the first time.
+            var spContainer = args.ObjectContainer.Resolve<RootServiceProviderContainer>();
+
+            if (spContainer.Scoping == ScopeLevelType.Scenario)
             {
+                var serviceProvider = spContainer.ServiceProvider;
+                // Now we can register a new scoped service provider
                 args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
                 {
-                    var serviceCollectionFinder = args.ObjectContainer.Resolve<IServiceCollectionFinder>();
-                    var createScenarioServiceCollection = serviceCollectionFinder.GetCreateScenarioServiceCollection();
-                    var services = createScenarioServiceCollection();
-
-                    RegisterObjectContainer(args.ObjectContainer, services);
-                    RegisterFeatureSpecFlowDependencies(services);
-                    RegisterTestThreadSpecFlowDependencies(services);
-
-                    return services.BuildServiceProvider();
+                    var scope = serviceProvider.CreateScope();
+                    ActiveServiceScopes.TryAdd(args.ObjectContainer.Resolve<ScenarioContext>(), scope);
+                    return scope.ServiceProvider;
                 });
-            };
-
-            runtimePluginEvents.CustomizeTestThreadDependencies += (sender, args) =>
+            }
+        }
+        
+        private static void AfterScenarioPluginLifecycleEventHandler(object sender, RuntimePluginAfterScenarioEventArgs eventArgs)
+        {
+            if (ActiveServiceScopes.TryRemove(eventArgs.ObjectContainer.Resolve<ScenarioContext>(), out var serviceScope))
             {
-                args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
-                {
-                    var serviceCollectionFinder = args.ObjectContainer.Resolve<IServiceCollectionFinder>();
-                    var createScenarioServiceCollection = serviceCollectionFinder.GetCreateScenarioServiceCollection();
-                    var services = createScenarioServiceCollection();
-
-                    RegisterObjectContainer(args.ObjectContainer, services);
-                    RegisterTestThreadSpecFlowDependencies(services);
-
-                    return services.BuildServiceProvider();
-                });
-            };
+                BindMapping.TryRemove(serviceScope.ServiceProvider, out _);
+                serviceScope.Dispose();
+            }
+        }
+        
+        private static void AfterFeaturePluginLifecycleEventHandler(object sender, RuntimePluginAfterFeatureEventArgs eventArgs)
+        {
+            if (ActiveServiceScopes.TryRemove(eventArgs.ObjectContainer.Resolve<FeatureContext>(), out var serviceScope))
+            {
+                BindMapping.TryRemove(serviceScope.ServiceProvider, out _);
+                serviceScope.Dispose();
+            }
         }
 
-        private static void RegisterObjectContainer(
-            IObjectContainer objectContainer,
-            IServiceCollection services)
+        private static void RegisterProxyBindings(IObjectContainer objectContainer, IServiceCollection services)
         {
-            services.AddTransient<IObjectContainer>(ctx => objectContainer);
-        }
+            // Required for DI of binding classes that want container injections
+            // While they can (and should) use the method params for injection, we can support it.
+            // Note that in Feature mode, one can't inject "ScenarioContext", this can only be done from method params.
+            
+            // Bases on this: https://docs.specflow.org/projects/specflow/en/latest/Extend/Available-Containers-%26-Registrations.html
+            // Might need to add more...
 
-        private static void RegisterScenarioSpecFlowDependencies(
-            IServiceCollection services)
-        {
-            services.AddTransient<ScenarioContext>(ctx =>
+            services.AddSingleton<IObjectContainer>(objectContainer);
+            services.AddSingleton(sp => objectContainer.Resolve<IRuntimeConfigurationProvider>());
+            services.AddSingleton(sp => objectContainer.Resolve<ITestRunnerManager>());
+            services.AddSingleton(sp => objectContainer.Resolve<IStepFormatter>());
+            services.AddSingleton(sp => objectContainer.Resolve<ITestTracer>());
+            services.AddSingleton(sp => objectContainer.Resolve<ITraceListener>());
+            services.AddSingleton(sp => objectContainer.Resolve<ITraceListenerQueue>());
+            services.AddSingleton(sp => objectContainer.Resolve<IErrorProvider>());
+            services.AddSingleton(sp => objectContainer.Resolve<IRuntimeBindingSourceProcessor>());
+            services.AddSingleton(sp => objectContainer.Resolve<IBindingRegistry>());
+            services.AddSingleton(sp => objectContainer.Resolve<IBindingFactory>());
+            services.AddSingleton(sp => objectContainer.Resolve<IStepDefinitionRegexCalculator>());
+            services.AddSingleton(sp => objectContainer.Resolve<IBindingInvoker>());
+            services.AddSingleton(sp => objectContainer.Resolve<IStepDefinitionSkeletonProvider>());
+            services.AddSingleton(sp => objectContainer.Resolve<ISkeletonTemplateProvider>());
+            services.AddSingleton(sp => objectContainer.Resolve<IStepTextAnalyzer>());
+            services.AddSingleton(sp => objectContainer.Resolve<IRuntimePluginLoader>());
+            services.AddSingleton(sp => objectContainer.Resolve<IBindingAssemblyLoader>());
+
+            services.AddTransient(sp =>
             {
-                var specflowContainer = ctx.GetService<IObjectContainer>();
-                var scenarioContext = specflowContainer.Resolve<ScenarioContext>();
-                return scenarioContext;
+                var container = BindMapping.TryGetValue(sp, out var ctx)
+                    ? ctx.ScenarioContext?.ScenarioContainer ??
+                      ctx.FeatureContext?.FeatureContainer ??
+                      ctx.TestThreadContext?.TestThreadContainer ??
+                      objectContainer
+                    : objectContainer;
+
+                return container.Resolve<ISpecFlowOutputHelper>();
             });
+            
+            services.AddTransient(sp => BindMapping[sp]);
+            services.AddTransient(sp => BindMapping[sp].TestThreadContext);
+            services.AddTransient(sp => BindMapping[sp].FeatureContext);
+            services.AddTransient(sp => BindMapping[sp].ScenarioContext);
+            services.AddTransient(sp => BindMapping[sp].TestThreadContext.TestThreadContainer.Resolve<ITestRunner>());
+            services.AddTransient(sp => BindMapping[sp].TestThreadContext.TestThreadContainer.Resolve<ITestExecutionEngine>());
+            services.AddTransient(sp => BindMapping[sp].TestThreadContext.TestThreadContainer.Resolve<IStepArgumentTypeConverter>());
+            services.AddTransient(sp => BindMapping[sp].TestThreadContext.TestThreadContainer.Resolve<IStepDefinitionMatchService>());
         }
 
-        private static void RegisterFeatureSpecFlowDependencies(
-            IServiceCollection services)
+        private class RootServiceProviderContainer
         {
-            services.AddTransient<FeatureContext>(ctx =>
-            {
-                var specflowContainer = ctx.GetService<IObjectContainer>();
-                var featureContext = specflowContainer.Resolve<FeatureContext>();
-                return featureContext;
-            });
-        }
+            public IServiceProvider ServiceProvider { get; }
+            public ScopeLevelType Scoping { get; }
 
-        private static void RegisterTestThreadSpecFlowDependencies(
-            IServiceCollection services)
-        {
-            services.AddTransient<TestThreadContext>(ctx =>
+            public RootServiceProviderContainer(IServiceProvider sp, ScopeLevelType scoping)
             {
-                var specflowContainer = ctx.GetService<IObjectContainer>();
-                var testThreadContext = specflowContainer.Resolve<TestThreadContext>();
-                return testThreadContext;
-            });
+                ServiceProvider = sp;
+                Scoping = scoping;
+            }
         }
     }
 }
