@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit.Abstractions;
 
 namespace SolidToken.SpecFlow.DependencyInjection.Tests
 {
