@@ -83,13 +83,15 @@ stages:
 - stage: CD
   # condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
   jobs:
-  - job: Prerelease
+  - job: Release
     # condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
+    # condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
     variables:
       SemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.SemVer']]
       FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
       NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
+      IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
     steps:
     - task: DotNetCoreCLI@2
       displayName: 'Prepare'
@@ -115,7 +117,39 @@ stages:
           --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
           --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
           --azure-key-vault-certificate "$(azure-key-vault-certificate)"
+    # - task: NuGetCommand@2
+    #   displayName: 'Push'
+    #   inputs:
+    #     command: 'push'
+    #     packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
+    #     nuGetFeedType: 'external'
+    #     publishFeedCredentials: '$(NuGetConnection)'
+    #     includeSymbols: true
     - task: GitHubRelease@1
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
+      displayName: 'Preview'
+      inputs:
+        gitHubConnection: '$(GitHubConnection)'
+        repositoryName: '$(Build.Repository.Name)'
+        action: 'edit'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'userSpecifiedTag'
+        tag: 'v$(SemVer)'
+        title: 'v$(FullSemVer)'
+        assets: '$(Pipeline.Workspace)/*'
+        releaseNotesSource: 'inline'
+        releaseNotesInline: |
+          $(NuGetDescription)
+          https://www.nuget.org/packages/$(NuGetPackageName)/$(NuGetVersion)
+
+          `$(informationalVersion)` (Preview)
+        changeLogCompareToRelease: 'lastFullRelease'
+        changeLogType: 'commitBased'
+        isDraft: true
+        # There is no way to set a boolean value except using a condition for the entire task
+        isPreRelease: true
+    - task: GitHubRelease@1
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
       displayName: 'Release'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
@@ -135,67 +169,5 @@ stages:
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
         isDraft: true
-        isPreRelease: true
-
-  # - job: Release
-  #   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
-  #   variables:
-  #     SemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.SemVer']]
-  #     FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
-  #     NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
-  #     InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
-  #     IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
-  #   steps:
-  #   - task: DotNetCoreCLI@2
-  #     displayName: 'Prepare'
-  #     inputs:
-  #       command: 'custom'
-  #       custom: 'tool'
-  #       arguments: 'install --tool-path . NuGetKeyVaultSignTool'
-  #   - task: DownloadPipelineArtifact@2
-  #     displayName: 'Download'
-  #     inputs:
-  #       artifactName: '$(ProjectName)'
-  #   - task: PowerShell@2
-  #     displayName: 'Sign'
-  #     inputs:
-  #       targetType: 'inline'
-  #       script: |
-  #         .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)/*.nupkg `
-  #         --file-digest "sha256" `
-  #         --timestamp-rfc3161 "http://timestamp.sectigo.com" `
-  #         --timestamp-digest "sha256" `
-  #         --azure-key-vault-url "$(azure-key-vault-url)" `
-  #         --azure-key-vault-tenant-id "$(azure-key-vault-tenant-id)" `
-  #         --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
-  #         --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
-  #         --azure-key-vault-certificate "$(azure-key-vault-certificate)"
-  #   # - task: NuGetCommand@2
-  #   #   displayName: 'Push'
-  #   #   inputs:
-  #   #     command: 'push'
-  #   #     packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
-  #   #     nuGetFeedType: 'external'
-  #   #     publishFeedCredentials: '$(NuGetConnection)'
-  #   #     includeSymbols: true
-  #   - task: GitHubRelease@1
-  #     displayName: 'Release'
-  #     inputs:
-  #       gitHubConnection: '$(GitHubConnection)'
-  #       repositoryName: '$(Build.Repository.Name)'
-  #       action: 'edit'
-  #       target: '$(Build.SourceVersion)'
-  #       tagSource: 'userSpecifiedTag'
-  #       tag: 'v$(SemVer)'
-  #       title: 'v$(FullSemVer)'
-  #       assets: '$(Pipeline.Workspace)/*'
-  #       releaseNotesSource: 'inline'
-  #       releaseNotesInline: |
-  #         $(NuGetDescription)
-  #         https://www.nuget.org/packages/$(NuGetPackageName)/$(NuGetVersion)
-
-  #         `$(informationalVersion)`
-  #       changeLogCompareToRelease: 'lastFullRelease'
-  #       changeLogType: 'commitBased'
-  #       isDraft: true
-  #       isPreRelease: false
+        # There is no way to set a boolean value except using a condition for the entire task
+        isPreRelease: false
