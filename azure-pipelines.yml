@@ -20,6 +20,7 @@ variables:
 
 trigger:
 - main
+- refs/tags/v*
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -88,11 +89,32 @@ stages:
       FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
       NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
+      IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
     steps:
+    - task: DotNetCoreCLI@2
+      displayName: 'Prepare'
+      inputs:
+        command: 'custom'
+        custom: 'tool'
+        arguments: 'install --tool-path . NuGetKeyVaultSignTool'
     - task: DownloadPipelineArtifact@2
       displayName: 'Download'
       inputs:
         artifactName: '$(ProjectName)'
+    - task: PowerShell@2
+      displayName: 'Sign'
+      inputs:
+        targetType: 'inline'
+        script: |
+          .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)/*.nupkg `
+          --file-digest "sha256" `
+          --timestamp-rfc3161 "http://timestamp.sectigo.com" `
+          --timestamp-digest "sha256" `
+          --azure-key-vault-url "$(azure-key-vault-url)" `
+          --azure-key-vault-tenant-id "$(azure-key-vault-tenant-id)" `
+          --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
+          --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
+          --azure-key-vault-certificate "$(azure-key-vault-certificate)"
     - task: GitHubRelease@1
       displayName: 'Release'
       inputs:
@@ -121,6 +143,7 @@ stages:
       FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
       NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
+      IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
     steps:
     - task: DotNetCoreCLI@2
       displayName: 'Prepare'
@@ -132,20 +155,20 @@ stages:
       displayName: 'Download'
       inputs:
         artifactName: '$(ProjectName)'
-    # - task: PowerShell@2
-    #   displayName: 'Sign'
-    #   inputs:
-    #     targetType: 'inline'
-    #     script: |
-    #       .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)/*.nupkg `
-    #       --file-digest "sha256" `
-    #       --timestamp-rfc3161 "http://timestamp.sectigo.com" `
-    #       --timestamp-digest "sha256" `
-    #       --azure-key-vault-url "$(azure-key-vault-url)" `
-    #       --azure-key-vault-tenant-id "$(azure-key-vault-tenant-id)" `
-    #       --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
-    #       --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
-    #       --azure-key-vault-certificate "$(azure-key-vault-certificate)"
+    - task: PowerShell@2
+      displayName: 'Sign'
+      inputs:
+        targetType: 'inline'
+        script: |
+          .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)/*.nupkg `
+          --file-digest "sha256" `
+          --timestamp-rfc3161 "http://timestamp.sectigo.com" `
+          --timestamp-digest "sha256" `
+          --azure-key-vault-url "$(azure-key-vault-url)" `
+          --azure-key-vault-tenant-id "$(azure-key-vault-tenant-id)" `
+          --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
+          --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
+          --azure-key-vault-certificate "$(azure-key-vault-certificate)"
     # - task: NuGetCommand@2
     #   displayName: 'Push'
     #   inputs:
