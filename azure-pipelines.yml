@@ -98,28 +98,28 @@ stages:
       displayName: 'Download'
       inputs:
         artifactName: '$(ProjectName)'
-    - task: PowerShell@2
-      displayName: 'Sign'
-      inputs:
-        targetType: 'inline'
-        script: |
-          .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)/*.nupkg `
-          --file-digest "sha256" `
-          --timestamp-rfc3161 "http://timestamp.sectigo.com" `
-          --timestamp-digest "sha256" `
-          --azure-key-vault-url "$(azure-key-vault-url)" `
-          --azure-key-vault-tenant-id "$(azure-key-vault-tenant-id)" `
-          --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
-          --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
-          --azure-key-vault-certificate "$(azure-key-vault-certificate)"
-    - task: NuGetCommand@2
-      displayName: 'Push'
-      inputs:
-        command: 'push'
-        packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
-        nuGetFeedType: 'external'
-        publishFeedCredentials: '$(NuGetConnection)'
-        includeSymbols: true
+    # - task: PowerShell@2
+    #   displayName: 'Sign'
+    #   inputs:
+    #     targetType: 'inline'
+    #     script: |
+    #       .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)/*.nupkg `
+    #       --file-digest "sha256" `
+    #       --timestamp-rfc3161 "http://timestamp.sectigo.com" `
+    #       --timestamp-digest "sha256" `
+    #       --azure-key-vault-url "$(azure-key-vault-url)" `
+    #       --azure-key-vault-tenant-id "$(azure-key-vault-tenant-id)" `
+    #       --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
+    #       --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
+    #       --azure-key-vault-certificate "$(azure-key-vault-certificate)"
+    # - task: NuGetCommand@2
+    #   displayName: 'Push'
+    #   inputs:
+    #     command: 'push'
+    #     packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
+    #     nuGetFeedType: 'external'
+    #     publishFeedCredentials: '$(NuGetConnection)'
+    #     includeSymbols: true
     - task: GitHubRelease@1
       displayName: 'Release'
       inputs:
@@ -139,4 +139,5 @@ stages:
           `$(informationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
-        isDraft: false
+        isDraft: true
+        isPreRelease: true
