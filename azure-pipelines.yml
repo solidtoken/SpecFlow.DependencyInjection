@@ -79,7 +79,7 @@ stages:
         summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
 
 - stage: CD
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
   - job: Release
     variables:
