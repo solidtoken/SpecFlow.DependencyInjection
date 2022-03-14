@@ -117,16 +117,16 @@ stages:
           --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
           --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
           --azure-key-vault-certificate "$(azure-key-vault-certificate)"
-    # - task: NuGetCommand@2
-    #   displayName: 'Push'
-    #   inputs:
-    #     command: 'push'
-    #     packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
-    #     nuGetFeedType: 'external'
-    #     publishFeedCredentials: '$(NuGetConnection)'
-    #     includeSymbols: true
+    - task: NuGetCommand@2
+      displayName: 'Push'
+      inputs:
+        command: 'push'
+        packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
+        nuGetFeedType: 'external'
+        publishFeedCredentials: '$(NuGetConnection)'
+        includeSymbols: true
     - task: GitHubRelease@1
-      condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
       displayName: 'Preview'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
