@@ -81,7 +81,8 @@ stages:
 - stage: CD
   #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
-  - job: Release
+  - job: Prerelease
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
     variables:
       SemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.SemVer']]
       FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
@@ -141,3 +142,66 @@ stages:
         changeLogType: 'commitBased'
         isDraft: true
         isPreRelease: true
+
+    
+  - job: Release
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+    variables:
+      SemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.SemVer']]
+      FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
+      NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
+      InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
+    steps:
+    - task: DotNetCoreCLI@2
+      displayName: 'Prepare'
+      inputs:
+        command: 'custom'
+        custom: 'tool'
+        arguments: 'install --tool-path . NuGetKeyVaultSignTool'
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download'
+      inputs:
+        artifactName: '$(ProjectName)'
+    # - task: PowerShell@2
+    #   displayName: 'Sign'
+    #   inputs:
+    #     targetType: 'inline'
+    #     script: |
+    #       .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)/*.nupkg `
+    #       --file-digest "sha256" `
+    #       --timestamp-rfc3161 "http://timestamp.sectigo.com" `
+    #       --timestamp-digest "sha256" `
+    #       --azure-key-vault-url "$(azure-key-vault-url)" `
+    #       --azure-key-vault-tenant-id "$(azure-key-vault-tenant-id)" `
+    #       --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
+    #       --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
+    #       --azure-key-vault-certificate "$(azure-key-vault-certificate)"
+    # - task: NuGetCommand@2
+    #   displayName: 'Push'
+    #   inputs:
+    #     command: 'push'
+    #     packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
+    #     nuGetFeedType: 'external'
+    #     publishFeedCredentials: '$(NuGetConnection)'
+    #     includeSymbols: true
+    - task: GitHubRelease@1
+      displayName: 'Release'
+      inputs:
+        gitHubConnection: '$(GitHubConnection)'
+        repositoryName: '$(Build.Repository.Name)'
+        action: 'edit'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'userSpecifiedTag'
+        tag: 'v$(SemVer)'
+        title: 'v$(FullSemVer)'
+        assets: '$(Pipeline.Workspace)/*'
+        releaseNotesSource: 'inline'
+        releaseNotesInline: |
+          $(NuGetDescription)
+          https://www.nuget.org/packages/$(NuGetPackageName)/$(NuGetVersion)
+
+          `$(informationalVersion)`
+        changeLogCompareToRelease: 'lastFullRelease'
+        changeLogType: 'commitBased'
+        isDraft: true
+        isPreRelease: false
