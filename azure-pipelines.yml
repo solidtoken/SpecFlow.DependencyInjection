@@ -23,7 +23,8 @@ trigger:
 - refs/tags/v*
 
 pool:
-  vmImage: 'ubuntu-18.04'
+  # Prefer `ubuntu-latest`, but `NuGetKeyVaultSignTool` won't work anymore on Linux (because of dotnet issue https://github.com/dotnet/runtime/issues/48794)
+  vmImage: 'windows-latest'
     
 stages:
 - stage: CI
@@ -89,7 +90,6 @@ stages:
       FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
       NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
-      IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
     steps:
     - task: DotNetCoreCLI@2
       displayName: 'Prepare'
@@ -136,6 +136,7 @@ stages:
         changeLogType: 'commitBased'
         isDraft: true
         isPreRelease: true
+
   # - job: Release
   #   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
   #   variables:
