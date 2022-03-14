@@ -82,19 +82,19 @@ stages:
   #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
   - job: Prerelease
-    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
+    #condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
     variables:
       SemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.SemVer']]
       FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
       NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
     steps:
-    - task: DotNetCoreCLI@2
-      displayName: 'Prepare'
-      inputs:
-        command: 'custom'
-        custom: 'tool'
-        arguments: 'install --tool-path . NuGetKeyVaultSignTool'
+    # - task: DotNetCoreCLI@2
+    #   displayName: 'Prepare'
+    #   inputs:
+    #     command: 'custom'
+    #     custom: 'tool'
+    #     arguments: 'install --tool-path . NuGetKeyVaultSignTool'
     - task: DownloadPipelineArtifact@2
       displayName: 'Download'
       inputs:
