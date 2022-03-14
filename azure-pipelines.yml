@@ -23,7 +23,7 @@ trigger:
 - refs/tags/v*
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'windows-latest'
     
 stages:
 - stage: CI
