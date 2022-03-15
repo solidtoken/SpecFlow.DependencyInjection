@@ -82,11 +82,9 @@ stages:
         summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
 
 - stage: CD
-  # condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
   jobs:
   - job: Release
-    # condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/main')
-    # condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
     variables:
       SemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.SemVer']]
       FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
@@ -127,7 +125,7 @@ stages:
         publishFeedCredentials: '$(NuGetConnection)'
         includeSymbols: true
     - task: GitHubRelease@1
-      # condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
       displayName: 'Preview'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
@@ -143,10 +141,10 @@ stages:
           $(NuGetDescription)
           https://www.nuget.org/packages/$(NuGetPackageName)/$(NuGetVersion)
 
-          `$(informationalVersion)` (Preview)
+          `$(informationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
-        isDraft: true
+        isDraft: false
         # There is no way to set a boolean value except using a condition for the entire task
         isPreRelease: true
     - task: GitHubRelease@1
@@ -169,6 +167,6 @@ stages:
           `$(informationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
-        isDraft: true
+        isDraft: false
         # There is no way to set a boolean value except using a condition for the entire task
         isPreRelease: false
