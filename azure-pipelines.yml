@@ -104,12 +104,6 @@ stages:
       inputs:
         artifactName: '$(ProjectName)'
     - task: PowerShell@2
-      displayName: 'Version'
-      inputs:
-        targetType: 'inline'
-        script: |
-          .\NuGetKeyVaultSignTool --version
-    - task: PowerShell@2
       displayName: 'Sign'
       inputs:
         targetType: 'inline'
@@ -123,27 +117,16 @@ stages:
           --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
           --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
           --azure-key-vault-certificate "$(azure-key-vault-certificate)"
-    - task: PowerShell@2
-      displayName: 'Verify'
-      inputs:
-        targetType: 'inline'
-        script: |
-          .\NuGetKeyVaultSignTool verify $(Pipeline.Workspace)/*.nupkg
-    - task: NuGetCommand@2
-      displayName: 'Nuget Verify'
-      inputs:
-        command: 'custom'
-        arguments: 'verify -Signatures $(Pipeline.Workspace)/*.nupkg'
-    - task: NuGetCommand@2
-      displayName: 'Push'
-      inputs:
-        command: 'push'
-        packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
-        nuGetFeedType: 'external'
-        publishFeedCredentials: '$(NuGetConnection)'
-        includeSymbols: true
+    # - task: NuGetCommand@2
+    #   displayName: 'Push'
+    #   inputs:
+    #     command: 'push'
+    #     packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
+    #     nuGetFeedType: 'external'
+    #     publishFeedCredentials: '$(NuGetConnection)'
+    #     includeSymbols: true
     - task: GitHubRelease@1
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      # condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
       displayName: 'Preview'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
