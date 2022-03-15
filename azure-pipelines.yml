@@ -130,6 +130,11 @@ stages:
         script: |
           .\NuGetKeyVaultSignTool verify $(Pipeline.Workspace)/*.nupkg
     - task: NuGetCommand@2
+      displayName: 'Nuget Verify'
+      inputs:
+        command: 'custom'
+        arguments: 'verify -Signatures $(Pipeline.Workspace)/*.nupkg'
+    - task: NuGetCommand@2
       displayName: 'Push'
       inputs:
         command: 'push'
