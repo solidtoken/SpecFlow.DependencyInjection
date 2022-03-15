@@ -94,9 +94,9 @@ stages:
       IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
     steps:
     - task: UseDotNet@2
-      displayName: '.NET SDK 5.0 (until May 8, 2022)'
+      displayName: '.NET SDK 3.1 (until December 3, 2022)'
       inputs:
-        version: 5.0.x
+        version: 3.1.x      
     - task: DotNetCoreCLI@2
       displayName: 'Prepare'
       inputs:
