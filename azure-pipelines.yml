@@ -123,6 +123,12 @@ stages:
           --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
           --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
           --azure-key-vault-certificate "$(azure-key-vault-certificate)"
+    - task: PowerShell@2
+      displayName: 'Verify'
+      inputs:
+        targetType: 'inline'
+        script: |
+          .\NuGetKeyVaultSignTool verify $(Pipeline.Workspace)/*.nupkg
     - task: NuGetCommand@2
       displayName: 'Push'
       inputs:
