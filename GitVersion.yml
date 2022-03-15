@@ -1,7 +1,8 @@
-mode: Mainline
+mode: ContinuousDeployment
 assembly-versioning-scheme: MajorMinorPatch
 assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{env:BUILD_BUILDID ?? 0}'
 assembly-informational-format: '{SemVer}+{ShortSha}'
+continuous-delivery-fallback-tag: preview
 branches:
   main:
     regex: ^main$

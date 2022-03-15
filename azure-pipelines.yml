@@ -20,9 +20,12 @@ variables:
 
 trigger:
 - main
+- refs/tags/v*
 
 pool:
-  vmImage: 'ubuntu-latest'
+  # Prefer `ubuntu-latest`, but `NuGetKeyVaultSignTool` won't work anymore on Linux (because of dotnet issue https://github.com/dotnet/runtime/issues/48794)
+  # Also make sure that the proper / or \ is used (according to OS) in the 'Sign' task below
+  vmImage: 'windows-latest'
     
 stages:
 - stage: CI
@@ -79,7 +82,7 @@ stages:
         summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
 
 - stage: CD
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
   jobs:
   - job: Release
     variables:
@@ -87,6 +90,7 @@ stages:
       FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
       NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
+      IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
     steps:
     - task: DotNetCoreCLI@2
       displayName: 'Prepare'
@@ -103,7 +107,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)/*.nupkg `
+          .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)\*.nupkg `
           --file-digest "sha256" `
           --timestamp-rfc3161 "http://timestamp.sectigo.com" `
           --timestamp-digest "sha256" `
@@ -121,6 +125,30 @@ stages:
         publishFeedCredentials: '$(NuGetConnection)'
         includeSymbols: true
     - task: GitHubRelease@1
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      displayName: 'Preview'
+      inputs:
+        gitHubConnection: '$(GitHubConnection)'
+        repositoryName: '$(Build.Repository.Name)'
+        action: 'edit'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'userSpecifiedTag'
+        tag: 'v$(SemVer)'
+        title: 'v$(FullSemVer)'
+        assets: '$(Pipeline.Workspace)/*'
+        releaseNotesSource: 'inline'
+        releaseNotesInline: |
+          $(NuGetDescription)
+          https://www.nuget.org/packages/$(NuGetPackageName)/$(NuGetVersion)
+
+          `$(informationalVersion)`
+        changeLogCompareToRelease: 'lastFullRelease'
+        changeLogType: 'commitBased'
+        isDraft: false
+        # There is no way to set a boolean value except using a condition for the entire task
+        isPreRelease: true
+    - task: GitHubRelease@1
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
       displayName: 'Release'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
@@ -140,3 +168,5 @@ stages:
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
         isDraft: false
+        # There is no way to set a boolean value except using a condition for the entire task
+        isPreRelease: false
