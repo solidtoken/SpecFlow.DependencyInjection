@@ -24,6 +24,7 @@ trigger:
 
 pool:
   # Prefer `ubuntu-latest`, but `NuGetKeyVaultSignTool` won't work anymore on Linux (because of dotnet issue https://github.com/dotnet/runtime/issues/48794)
+  # Also make sure that the proper / or \ is used (according to OS) in the 'Sign' task below
   vmImage: 'windows-latest'
     
 stages:
@@ -117,14 +118,14 @@ stages:
           --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
           --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
           --azure-key-vault-certificate "$(azure-key-vault-certificate)"
-    # - task: NuGetCommand@2
-    #   displayName: 'Push'
-    #   inputs:
-    #     command: 'push'
-    #     packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
-    #     nuGetFeedType: 'external'
-    #     publishFeedCredentials: '$(NuGetConnection)'
-    #     includeSymbols: true
+    - task: NuGetCommand@2
+      displayName: 'Push'
+      inputs:
+        command: 'push'
+        packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
+        nuGetFeedType: 'external'
+        publishFeedCredentials: '$(NuGetConnection)'
+        includeSymbols: true
     - task: GitHubRelease@1
       # condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
       displayName: 'Preview'
