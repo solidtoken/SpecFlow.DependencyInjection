@@ -93,6 +93,10 @@ stages:
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
       IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
     steps:
+    - task: UseDotNet@2
+      displayName: '.NET SDK 5.0 (until May 8, 2022)'
+      inputs:
+        version: 5.0.x
     - task: DotNetCoreCLI@2
       displayName: 'Prepare'
       inputs:
