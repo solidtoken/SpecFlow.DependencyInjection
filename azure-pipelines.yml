@@ -108,7 +108,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)/*.nupkg `
+          .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)\*.nupkg `
           --file-digest "sha256" `
           --timestamp-rfc3161 "http://timestamp.sectigo.com" `
           --timestamp-digest "sha256" `
