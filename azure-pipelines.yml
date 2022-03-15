@@ -93,10 +93,6 @@ stages:
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
       IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
     steps:
-    - task: UseDotNet@2
-      displayName: '.NET SDK 3.1 (until December 3, 2022)'
-      inputs:
-        version: 3.1.x      
     - task: DotNetCoreCLI@2
       displayName: 'Prepare'
       inputs:
@@ -107,6 +103,12 @@ stages:
       displayName: 'Download'
       inputs:
         artifactName: '$(ProjectName)'
+    - task: PowerShell@2
+      displayName: 'Version'
+      inputs:
+        targetType: 'inline'
+        script: |
+          .\NuGetKeyVaultSignTool --version
     - task: PowerShell@2
       displayName: 'Sign'
       inputs:
