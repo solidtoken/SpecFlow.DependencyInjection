@@ -89,15 +89,15 @@ stages:
         action: 'edit'
         target: '$(Build.SourceVersion)'
         tagSource: 'userSpecifiedTag'
-        tag: 'v$(Version.SemVer)'
-        title: 'v$(Version.FullSemVer)'
+        tag: 'v$(Version.GitVersion.SemVer)'
+        title: 'v$(Version.GitVersion.FullSemVer)'
         assets: '$(Pipeline.Workspace)/*'
         releaseNotesSource: 'inline'
         releaseNotesInline: |
           $(NuGetDescription)
           (Publish this release to push it to NuGet)
 
-          `$(Version.InformationalVersion)`
+          `$(Version.GitVersion.InformationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
         isDraft: true
