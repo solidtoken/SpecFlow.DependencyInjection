@@ -91,6 +91,9 @@ stages:
       NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
       IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
+      IsPreRelease1: contains(variables['GitVersion.NuGetVersionV2'], '-')
+      IsPreRelease2: contains(variables['SemVer'], '-')
+      IsPreRelease3: contains(stageDependencies.CI.Build.outputs['Version.GitVersion.SemVer'], '-')
     steps:
     - task: DotNetCoreCLI@2
       displayName: 'Prepare'
