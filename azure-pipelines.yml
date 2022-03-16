@@ -82,7 +82,7 @@ stages:
         summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
       
 - stage: CD
-  # condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')))
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')))
   jobs:
   - job: Release
     variables:
@@ -117,7 +117,7 @@ stages:
           --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
           --azure-key-vault-certificate "$(azure-key-vault-certificate)"
     - task: GitHubRelease@1
-      # condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
       displayName: 'Draft'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
@@ -131,7 +131,7 @@ stages:
         releaseNotesSource: 'inline'
         releaseNotesInline: |
           $(NuGetDescription)
-          https://www.nuget.org/packages/$(NuGetPackageName)/$(SemVer)
+          *(Publish release to push to NuGet)*          
 
           `$(InformationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
