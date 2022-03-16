@@ -149,7 +149,7 @@ stages:
         changeLogType: 'commitBased'
         isDraft: true
         # There is no way to set a boolean value except using a condition for the entire task
-        ${{ if contains(variables.SemVer, '-') }}:
+        ${{ if contains(variables['SemVer'], '-') }}:
           isPreRelease: true
         ${{ else }}:
           isPreRelease: false
