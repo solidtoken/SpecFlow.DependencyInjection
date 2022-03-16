@@ -80,9 +80,9 @@ stages:
       inputs:
         codeCoverageTool: 'Cobertura'
         summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
-
+      
 - stage: CD
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')))
   jobs:
   - job: Release
     variables:
@@ -90,18 +90,18 @@ stages:
       FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
       NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
-      IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
+      IsPreRelease: $[contains(variables.SemVer, '-')]
     steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download'
+      inputs:
+        artifactName: '$(ProjectName)'
     - task: DotNetCoreCLI@2
       displayName: 'Prepare'
       inputs:
         command: 'custom'
         custom: 'tool'
         arguments: 'install --tool-path . NuGetKeyVaultSignTool'
-    - task: DownloadPipelineArtifact@2
-      displayName: 'Download'
-      inputs:
-        artifactName: '$(ProjectName)'
     - task: PowerShell@2
       displayName: 'Sign'
       inputs:
@@ -116,17 +116,9 @@ stages:
           --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
           --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
           --azure-key-vault-certificate "$(azure-key-vault-certificate)"
-    - task: NuGetCommand@2
-      displayName: 'Push'
-      inputs:
-        command: 'push'
-        packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
-        nuGetFeedType: 'external'
-        publishFeedCredentials: '$(NuGetConnection)'
-        includeSymbols: true
     - task: GitHubRelease@1
       condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
-      displayName: 'Preview'
+      displayName: 'Draft'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
         repositoryName: '$(Build.Repository.Name)'
@@ -139,16 +131,24 @@ stages:
         releaseNotesSource: 'inline'
         releaseNotesInline: |
           $(NuGetDescription)
-          https://www.nuget.org/packages/$(NuGetPackageName)/$(NuGetVersion)
+          *(Publish release to push to NuGet)*          
 
-          `$(informationalVersion)`
+          `$(InformationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
-        isDraft: false
-        # There is no way to set a boolean value except using a condition for the entire task
-        isPreRelease: true
+        isDraft: true
+        isPreRelease: $(IsPreRelease) # ignore vscode warning
+    - task: NuGetCommand@2
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+      displayName: 'Push'
+      inputs:
+        command: 'push'
+        packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
+        nuGetFeedType: 'external'
+        publishFeedCredentials: '$(NuGetConnection)'
+        includeSymbols: true
     - task: GitHubRelease@1
-      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
       displayName: 'Release'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
@@ -162,11 +162,10 @@ stages:
         releaseNotesSource: 'inline'
         releaseNotesInline: |
           $(NuGetDescription)
-          https://www.nuget.org/packages/$(NuGetPackageName)/$(NuGetVersion)
+          https://www.nuget.org/packages/$(NuGetPackageName)/$(SemVer)
 
-          `$(informationalVersion)`
+          `$(InformationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
         isDraft: false
-        # There is no way to set a boolean value except using a condition for the entire task
-        isPreRelease: false
+        isPreRelease: $(IsPreRelease) # ignore vscode warning
