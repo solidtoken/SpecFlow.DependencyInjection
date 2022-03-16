@@ -149,7 +149,10 @@ stages:
         changeLogType: 'commitBased'
         isDraft: true
         # There is no way to set a boolean value except using a condition for the entire task
-        isPreRelease: contains(variables['SemVer'], '-')
+        ${{ if contains(variables.SemVer, '-') }}:
+          isPreRelease: true
+        ${{ else }}:
+          isPreRelease: false
     - task: GitHubRelease@1
       condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
       displayName: 'Release'
