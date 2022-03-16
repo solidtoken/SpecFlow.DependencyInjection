@@ -80,9 +80,31 @@ stages:
       inputs:
         codeCoverageTool: 'Cobertura'
         summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
+    - task: GitHubRelease@1
+      # condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      displayName: 'Draft'
+      inputs:
+        gitHubConnection: '$(GitHubConnection)'
+        repositoryName: '$(Build.Repository.Name)'
+        action: 'edit'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'userSpecifiedTag'
+        tag: 'v$(Version.SemVer)'
+        title: 'v$(Version.FullSemVer)'
+        assets: '$(Pipeline.Workspace)/*'
+        releaseNotesSource: 'inline'
+        releaseNotesInline: |
+          $(NuGetDescription)
+          (Publish this release to push it to NuGet)
 
+          `$(Version.InformationalVersion)`
+        changeLogCompareToRelease: 'lastFullRelease'
+        changeLogType: 'commitBased'
+        isDraft: true
+        isPreRelease: true
+      
 - stage: CD
-  # condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')))
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
   jobs:
   - job: Release
     variables:
@@ -90,22 +112,18 @@ stages:
       FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
       NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
-      IsRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
-      IsPreRelease1: $[contains(variables['GitVersion.NuGetVersionV2'], '-')]
-      IsPreRelease2: $[contains(variables['SemVer'], '-')]
-      IsPreRelease3: $[contains(stageDependencies.CI.Build.outputs['Version.GitVersion.SemVer'], '-')]
       IsPreRelease: $[contains(variables.SemVer, '-')]
     steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download'
+      inputs:
+        artifactName: '$(ProjectName)'
     - task: DotNetCoreCLI@2
       displayName: 'Prepare'
       inputs:
         command: 'custom'
         custom: 'tool'
         arguments: 'install --tool-path . NuGetKeyVaultSignTool'
-    - task: DownloadPipelineArtifact@2
-      displayName: 'Download'
-      inputs:
-        artifactName: '$(ProjectName)'
     - task: PowerShell@2
       displayName: 'Sign'
       inputs:
@@ -145,32 +163,37 @@ stages:
           $(NuGetDescription)
           https://www.nuget.org/packages/$(NuGetPackageName)/$(SemVer)
 
-          `$(informationalVersion)`
+          `$(InformationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
         isDraft: true
-        # There is no way to set a boolean value except using a condition for the entire task
+        # Although VSCode shows a warning, this is correct:
         isPreRelease: $(IsPreRelease)
-    - task: GitHubRelease@1
-      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-      displayName: 'Release'
-      inputs:
-        gitHubConnection: '$(GitHubConnection)'
-        repositoryName: '$(Build.Repository.Name)'
-        action: 'edit'
-        target: '$(Build.SourceVersion)'
-        tagSource: 'userSpecifiedTag'
-        tag: 'v$(SemVer)'
-        title: 'v$(FullSemVer)'
-        assets: '$(Pipeline.Workspace)/*'
-        releaseNotesSource: 'inline'
-        releaseNotesInline: |
-          $(NuGetDescription)
-          https://www.nuget.org/packages/$(NuGetPackageName)/$(SemVer)
+#     - task: GitHubRelease@1
+#       condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+#       displayName: 'Release'
+#       inputs:
+#         gitHubConnection: '$(GitHubConnection)'
+#         repositoryName: '$(Build.Repository.Name)'
+#         action: 'edit'
+#         target: '$(Build.SourceVersion)'
+#         tagSource: 'userSpecifiedTag'
+#         tag: 'v$(SemVer)'
+#         title: 'v$(FullSemVer)'
+#         assets: '$(Pipeline.Workspace)/*'
+#         releaseNotesSource: 'inline'
+#         releaseNotesInline: |
+#           $(NuGetDescription)
+#           https://www.nuget.org/packages/$(NuGetPackageName)/$(SemVer)
 
-          `$(informationalVersion)`
-        changeLogCompareToRelease: 'lastFullRelease'
-        changeLogType: 'commitBased'
-        isDraft: false
-        # There is no way to set a boolean value except using a condition for the entire task
-        isPreRelease: false
+#           `$(informationalVersion)`
+#         changeLogCompareToRelease: 'lastFullRelease'
+#         changeLogType: 'commitBased'
+#         isDraft: false
+#         # There is no way to set a boolean value except using a condition for the entire task
+#         isPreRelease: false
+
+
+
+# a) if it is a build for a tag:
+#   - assume there is already a GitHubRelease@1
