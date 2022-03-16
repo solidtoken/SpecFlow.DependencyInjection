@@ -82,7 +82,7 @@ stages:
         summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
 
 - stage: CD
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')))
+  # condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')))
   jobs:
   - job: Release
     variables:
@@ -116,16 +116,16 @@ stages:
           --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
           --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
           --azure-key-vault-certificate "$(azure-key-vault-certificate)"
-    - task: NuGetCommand@2
-      displayName: 'Push'
-      inputs:
-        command: 'push'
-        packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
-        nuGetFeedType: 'external'
-        publishFeedCredentials: '$(NuGetConnection)'
-        includeSymbols: true
+    # - task: NuGetCommand@2
+    #   displayName: 'Push'
+    #   inputs:
+    #     command: 'push'
+    #     packagesToPush: '$(Pipeline.Workspace)/*.nupkg'
+    #     nuGetFeedType: 'external'
+    #     publishFeedCredentials: '$(NuGetConnection)'
+    #     includeSymbols: true
     - task: GitHubRelease@1
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      # condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
       displayName: 'Preview'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
@@ -139,16 +139,16 @@ stages:
         releaseNotesSource: 'inline'
         releaseNotesInline: |
           $(NuGetDescription)
-          https://www.nuget.org/packages/$(NuGetPackageName)/$(NuGetVersion)
+          https://www.nuget.org/packages/$(NuGetPackageName)/$(SemVer)
 
           `$(informationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
-        isDraft: false
+        isDraft: true
         # There is no way to set a boolean value except using a condition for the entire task
-        isPreRelease: true
+        isPreRelease: contains(variables['SemVer'], '-')
     - task: GitHubRelease@1
-      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
       displayName: 'Release'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
@@ -162,7 +162,7 @@ stages:
         releaseNotesSource: 'inline'
         releaseNotesInline: |
           $(NuGetDescription)
-          https://www.nuget.org/packages/$(NuGetPackageName)/$(NuGetVersion)
+          https://www.nuget.org/packages/$(NuGetPackageName)/$(SemVer)
 
           `$(informationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
