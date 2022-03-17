@@ -20,9 +20,12 @@ variables:
 
 trigger:
 - main
+- refs/tags/v*
 
 pool:
-  vmImage: 'ubuntu-latest'
+  # Prefer `ubuntu-latest`, but `NuGetKeyVaultSignTool` won't work anymore on Linux (because of dotnet issue https://github.com/dotnet/runtime/issues/48794)
+  # Also make sure that the proper / or \ is used (according to OS) in the 'Sign' task below
+  vmImage: 'windows-latest'
     
 stages:
 - stage: CI
@@ -77,9 +80,9 @@ stages:
       inputs:
         codeCoverageTool: 'Cobertura'
         summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
-
+      
 - stage: CD
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')))
   jobs:
   - job: Release
     variables:
@@ -87,23 +90,24 @@ stages:
       FullSemVer: $[stageDependencies.CI.Build.outputs['Version.GitVersion.FullSemVer']]
       NuGetVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.NuGetVersion']]
       InformationalVersion: $[stageDependencies.CI.Build.outputs['Version.GitVersion.InformationalVersion']]
+      IsPreRelease: $[contains(variables.SemVer, '-')]
     steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download'
+      inputs:
+        artifactName: '$(ProjectName)'
     - task: DotNetCoreCLI@2
       displayName: 'Prepare'
       inputs:
         command: 'custom'
         custom: 'tool'
         arguments: 'install --tool-path . NuGetKeyVaultSignTool'
-    - task: DownloadPipelineArtifact@2
-      displayName: 'Download'
-      inputs:
-        artifactName: '$(ProjectName)'
     - task: PowerShell@2
       displayName: 'Sign'
       inputs:
         targetType: 'inline'
         script: |
-          .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)/*.nupkg `
+          .\NuGetKeyVaultSignTool sign $(Pipeline.Workspace)\*.nupkg `
           --file-digest "sha256" `
           --timestamp-rfc3161 "http://timestamp.sectigo.com" `
           --timestamp-digest "sha256" `
@@ -112,7 +116,30 @@ stages:
           --azure-key-vault-client-id "$(azure-key-vault-client-id)" `
           --azure-key-vault-client-secret "$(azure-key-vault-client-secret)" `
           --azure-key-vault-certificate "$(azure-key-vault-certificate)"
+    - task: GitHubRelease@1
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      displayName: 'Draft'
+      inputs:
+        gitHubConnection: '$(GitHubConnection)'
+        repositoryName: '$(Build.Repository.Name)'
+        action: 'edit'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'userSpecifiedTag'
+        tag: 'v$(SemVer)'
+        title: 'v$(FullSemVer)'
+        assets: '$(Pipeline.Workspace)/*'
+        releaseNotesSource: 'inline'
+        releaseNotesInline: |
+          $(NuGetDescription)
+          *(Publish release to push to NuGet)*          
+
+          `$(InformationalVersion)`
+        changeLogCompareToRelease: 'lastFullRelease'
+        changeLogType: 'commitBased'
+        isDraft: true
+        isPreRelease: $(IsPreRelease) # ignore vscode warning
     - task: NuGetCommand@2
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
       displayName: 'Push'
       inputs:
         command: 'push'
@@ -121,6 +148,7 @@ stages:
         publishFeedCredentials: '$(NuGetConnection)'
         includeSymbols: true
     - task: GitHubRelease@1
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
       displayName: 'Release'
       inputs:
         gitHubConnection: '$(GitHubConnection)'
@@ -134,9 +162,10 @@ stages:
         releaseNotesSource: 'inline'
         releaseNotesInline: |
           $(NuGetDescription)
-          https://www.nuget.org/packages/$(NuGetPackageName)/$(NuGetVersion)
+          https://www.nuget.org/packages/$(NuGetPackageName)/$(SemVer)
 
-          `$(informationalVersion)`
+          `$(InformationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
         isDraft: false
+        isPreRelease: $(IsPreRelease) # ignore vscode warning
