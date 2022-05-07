@@ -19,14 +19,14 @@ namespace SolidToken.SpecFlow.DependencyInjection
 {
     public class DependencyInjectionPlugin : IRuntimePlugin
     {
-        private static readonly ConcurrentDictionary<IServiceProvider, IContextManager> BindMapping =
+        private static readonly ConcurrentDictionary<IServiceProvider, IContextManager> BindMappings =
             new ConcurrentDictionary<IServiceProvider, IContextManager>();
-        
+
         private static readonly ConcurrentDictionary<ISpecFlowContext, IServiceScope> ActiveServiceScopes =
             new ConcurrentDictionary<ISpecFlowContext, IServiceScope>();
 
         private readonly object _registrationLock = new object();
-        
+
         public void Initialize(RuntimePluginEvents runtimePluginEvents, RuntimePluginParameters runtimePluginParameters, UnitTestProviderConfiguration unitTestProviderConfiguration)
         {
             runtimePluginEvents.CustomizeGlobalDependencies += CustomizeGlobalDependencies;
@@ -46,7 +46,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
                         args.ObjectContainer.RegisterTypeAs<ServiceCollectionFinder, IServiceCollectionFinder>();
                     }
 
-                    // We store the service provider in the global container, we create it only once
+                    // We store the (MS) service provider in the global (BoDi) container, we create it only once.
                     // It must be lazy (hence factory) because at this point we still don't have the bindings mapped.
                     args.ObjectContainer.RegisterFactoryAs<RootServiceProviderContainer>(() =>
                     {
@@ -70,7 +70,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
                 args.ObjectContainer.Resolve<IServiceCollectionFinder>();
             }
         }
-        
+
         private static void CustomizeFeatureDependenciesEventHandler(object sender, CustomizeFeatureDependenciesEventArgs args)
         {
             // At this point we have the bindings, we can resolve the service provider, which will build it if it's the first time.
@@ -84,10 +84,19 @@ namespace SolidToken.SpecFlow.DependencyInjection
                 args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
                 {
                     var scope = serviceProvider.CreateScope();
-                    BindMapping.TryAdd(scope.ServiceProvider, args.ObjectContainer.Resolve<IContextManager>());
+                    BindMappings.TryAdd(scope.ServiceProvider, args.ObjectContainer.Resolve<IContextManager>());
                     ActiveServiceScopes.TryAdd(args.ObjectContainer.Resolve<FeatureContext>(), scope);
                     return scope.ServiceProvider;
                 });
+            }
+        }
+
+        private static void AfterFeaturePluginLifecycleEventHandler(object sender, RuntimePluginAfterFeatureEventArgs eventArgs)
+        {
+            if (ActiveServiceScopes.TryRemove(eventArgs.ObjectContainer.Resolve<FeatureContext>(), out var serviceScope))
+            {
+                BindMappings.TryRemove(serviceScope.ServiceProvider, out _);
+                serviceScope.Dispose();
             }
         }
 
@@ -103,26 +112,18 @@ namespace SolidToken.SpecFlow.DependencyInjection
                 args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
                 {
                     var scope = serviceProvider.CreateScope();
+                    BindMappings.TryAdd(scope.ServiceProvider, args.ObjectContainer.Resolve<IContextManager>());
                     ActiveServiceScopes.TryAdd(args.ObjectContainer.Resolve<ScenarioContext>(), scope);
                     return scope.ServiceProvider;
                 });
             }
         }
-        
+
         private static void AfterScenarioPluginLifecycleEventHandler(object sender, RuntimePluginAfterScenarioEventArgs eventArgs)
         {
             if (ActiveServiceScopes.TryRemove(eventArgs.ObjectContainer.Resolve<ScenarioContext>(), out var serviceScope))
             {
-                BindMapping.TryRemove(serviceScope.ServiceProvider, out _);
-                serviceScope.Dispose();
-            }
-        }
-        
-        private static void AfterFeaturePluginLifecycleEventHandler(object sender, RuntimePluginAfterFeatureEventArgs eventArgs)
-        {
-            if (ActiveServiceScopes.TryRemove(eventArgs.ObjectContainer.Resolve<FeatureContext>(), out var serviceScope))
-            {
-                BindMapping.TryRemove(serviceScope.ServiceProvider, out _);
+                BindMappings.TryRemove(serviceScope.ServiceProvider, out _);
                 serviceScope.Dispose();
             }
         }
@@ -132,7 +133,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
             // Required for DI of binding classes that want container injections
             // While they can (and should) use the method params for injection, we can support it.
             // Note that in Feature mode, one can't inject "ScenarioContext", this can only be done from method params.
-            
+
             // Bases on this: https://docs.specflow.org/projects/specflow/en/latest/Extend/Available-Containers-%26-Registrations.html
             // Might need to add more...
 
@@ -157,7 +158,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
 
             services.AddTransient(sp =>
             {
-                var container = BindMapping.TryGetValue(sp, out var ctx)
+                var container = BindMappings.TryGetValue(sp, out var ctx)
                     ? ctx.ScenarioContext?.ScenarioContainer ??
                       ctx.FeatureContext?.FeatureContainer ??
                       ctx.TestThreadContext?.TestThreadContainer ??
@@ -166,15 +167,15 @@ namespace SolidToken.SpecFlow.DependencyInjection
 
                 return container.Resolve<ISpecFlowOutputHelper>();
             });
-            
-            services.AddTransient(sp => BindMapping[sp]);
-            services.AddTransient(sp => BindMapping[sp].TestThreadContext);
-            services.AddTransient(sp => BindMapping[sp].FeatureContext);
-            services.AddTransient(sp => BindMapping[sp].ScenarioContext);
-            services.AddTransient(sp => BindMapping[sp].TestThreadContext.TestThreadContainer.Resolve<ITestRunner>());
-            services.AddTransient(sp => BindMapping[sp].TestThreadContext.TestThreadContainer.Resolve<ITestExecutionEngine>());
-            services.AddTransient(sp => BindMapping[sp].TestThreadContext.TestThreadContainer.Resolve<IStepArgumentTypeConverter>());
-            services.AddTransient(sp => BindMapping[sp].TestThreadContext.TestThreadContainer.Resolve<IStepDefinitionMatchService>());
+
+            services.AddTransient(sp => BindMappings[sp]);
+            services.AddTransient(sp => BindMappings[sp].TestThreadContext);
+            services.AddTransient(sp => BindMappings[sp].FeatureContext);
+            services.AddTransient(sp => BindMappings[sp].ScenarioContext);
+            services.AddTransient(sp => BindMappings[sp].TestThreadContext.TestThreadContainer.Resolve<ITestRunner>());
+            services.AddTransient(sp => BindMappings[sp].TestThreadContext.TestThreadContainer.Resolve<ITestExecutionEngine>());
+            services.AddTransient(sp => BindMappings[sp].TestThreadContext.TestThreadContainer.Resolve<IStepArgumentTypeConverter>());
+            services.AddTransient(sp => BindMappings[sp].TestThreadContext.TestThreadContainer.Resolve<IStepDefinitionMatchService>());
         }
 
         private class RootServiceProviderContainer
