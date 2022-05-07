@@ -155,6 +155,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
             services.AddSingleton(sp => objectContainer.Resolve<IStepTextAnalyzer>());
             services.AddSingleton(sp => objectContainer.Resolve<IRuntimePluginLoader>());
             services.AddSingleton(sp => objectContainer.Resolve<IBindingAssemblyLoader>());
+            services.AddSingleton(sp => objectContainer.Resolve<IUnitTestRuntimeProvider>());
 
             services.AddTransient(sp =>
             {
