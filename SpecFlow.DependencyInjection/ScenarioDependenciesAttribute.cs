@@ -5,15 +5,15 @@ namespace SolidToken.SpecFlow.DependencyInjection
     public enum ScopeLevelType
     {
         /// <summary>
-        /// Scoping is created for every scenario and it is destroyed once the scenario ends.
+        /// Scoping is created for every Scenario and it is destroyed once the Scenario ends.
         /// </summary>
         Scenario,
         /// <summary>
-        /// Scoping is created for Feature scenario and it is destroyed once the Feature ends.
+        /// Scoping is created for every Feature and it is destroyed once the Feature ends.
         /// </summary>
         Feature
     }
-    
+
     [AttributeUsage(AttributeTargets.Method)]
     public class ScenarioDependenciesAttribute : Attribute
     {
@@ -21,6 +21,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
         /// Automatically register all SpecFlow bindings.
         /// </summary>
         public bool AutoRegisterBindings { get; set; } = true;
+
         /// <summary>
         /// Define when to create and destroy scope. 
         /// </summary>

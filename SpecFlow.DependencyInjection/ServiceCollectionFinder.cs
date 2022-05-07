@@ -12,7 +12,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
     {
         private readonly IBindingRegistry bindingRegistry;
         private (IServiceCollection, ScopeLevelType) _cache;
-        
+
         public ServiceCollectionFinder(IBindingRegistry bindingRegistry)
         {
             this.bindingRegistry = bindingRegistry;
@@ -21,8 +21,10 @@ namespace SolidToken.SpecFlow.DependencyInjection
         public (IServiceCollection, ScopeLevelType) GetServiceCollection()
         {
             if (_cache != default)
+            {
                 return _cache;
-            
+            }
+
             var assemblies = bindingRegistry.GetBindingAssemblies();
             foreach (var assembly in assemblies)
             {
@@ -47,7 +49,6 @@ namespace SolidToken.SpecFlow.DependencyInjection
             throw new MissingScenarioDependenciesException();
         }
 
-
         private static IServiceCollection GetServiceCollection(MethodBase methodInfo)
         {
             return (IServiceCollection)methodInfo.Invoke(null, null);
@@ -55,7 +56,7 @@ namespace SolidToken.SpecFlow.DependencyInjection
 
         private static void AddBindingAttributes(IEnumerable<Assembly> bindingAssemblies, IServiceCollection serviceCollection)
         {
-            foreach(var assembly in bindingAssemblies)
+            foreach (var assembly in bindingAssemblies)
             {
                 foreach (var type in assembly.GetTypes().Where(t => Attribute.IsDefined(t, typeof(BindingAttribute))))
                 {

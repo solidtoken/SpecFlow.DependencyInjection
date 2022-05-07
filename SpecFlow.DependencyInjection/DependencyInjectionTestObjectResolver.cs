@@ -27,10 +27,10 @@ namespace SolidToken.SpecFlow.DependencyInjection
         public object ResolveBindingInstance(Type bindingType, IObjectContainer container)
         {
             // Can remove if IsRegistered(Type type) exists
-            var mi = IsRegisteredMethodInfoCache.GetOrAdd(bindingType, CreateGenericMethodInfo);
-            var registered = (bool) mi.Invoke(this, new object[] { container });
+            var methodInfo = IsRegisteredMethodInfoCache.GetOrAdd(bindingType, CreateGenericMethodInfo);
+            var registered = (bool)methodInfo.Invoke(this, new object[] { container });
             // var registered = container.IsRegistered(bindingType);
-            
+
             return registered
                 ? container.Resolve(bindingType)
                 : container.Resolve<IServiceProvider>().GetRequiredService(bindingType);
@@ -39,11 +39,16 @@ namespace SolidToken.SpecFlow.DependencyInjection
         public bool IsRegistered<T>(IObjectContainer container)
         {
             if (container.IsRegistered<T>())
+            {
                 return true;
-            
+            }
+
             // IsRegistered is not recursive, it will only check the current container
             if (container is ObjectContainer c && c.BaseContainer != null)
+            {
                 return IsRegistered<T>(c.BaseContainer);
+            }
+
             return false;
         }
     }
