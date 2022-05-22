@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Infrastructure;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace SolidToken.SpecFlow.DependencyInjection.Tests
 {
