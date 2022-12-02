@@ -33,21 +33,13 @@ stages:
   - job: Build
     steps:
     - task: UseDotNet@2
-      displayName: '.NET SDK 3.1 (until December 3, 2022)'
-      inputs:
-        version: 3.1.x      
-    - task: UseDotNet@2
-      displayName: '.NET SDK 5.0 (until May 8, 2022)'
-      inputs:
-        version: 5.0.x
-    - task: UseDotNet@2
       displayName: '.NET SDK 6.0 (until November 8, 2024)'
       inputs:
         version: 6.0.x      
     - task: gitversion/setup@0
       displayName: 'Prepare'
       inputs:
-        versionSpec: '5.x'
+        versionSpec: '5.11.1'
     - task: gitversion/execute@0
       name: 'Version'
     - task: DotNetCoreCLI@2
