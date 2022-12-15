@@ -4,6 +4,8 @@ assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{env:BUILD_BUILDID ?? 
 assembly-informational-format: '{SemVer}+{ShortSha}'
 continuous-delivery-fallback-tag: preview
 branches:
+  feature:
+    tag: alpha.{BranchName}
   pull-request:
     tag: pr
 ignore:
