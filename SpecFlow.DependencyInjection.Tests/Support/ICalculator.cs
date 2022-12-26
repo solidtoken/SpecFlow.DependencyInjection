@@ -6,5 +6,6 @@
         void Add();
         void Multiply();
         int Result { get; }
+        int Size { get; }
     }
 }
