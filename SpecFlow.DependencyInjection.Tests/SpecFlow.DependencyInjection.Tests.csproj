@@ -39,4 +39,9 @@
     <ProjectReference Include="..\SpecFlow.DependencyInjection\SpecFlow.DependencyInjection.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Drivers\" />
+    <Folder Include="Hooks\" />
+  </ItemGroup>
+
 </Project>

@@ -1,6 +1,6 @@
 ﻿using TechTalk.SpecFlow;
 
-namespace SolidToken.SpecFlow.DependencyInjection.Tests
+namespace SolidToken.SpecFlow.DependencyInjection.Tests.Steps
 {
     [Binding]
     public class ScenarioContextDisposalSteps

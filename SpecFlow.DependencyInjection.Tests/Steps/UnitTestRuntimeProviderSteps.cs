@@ -7,7 +7,7 @@ using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.UnitTestProvider;
 using Xunit;
 
-namespace SolidToken.SpecFlow.DependencyInjection.Tests
+namespace SolidToken.SpecFlow.DependencyInjection.Tests.Steps
 {
     [Binding]
     public class UnitTestRuntimeProviderSteps

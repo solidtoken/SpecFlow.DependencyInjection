@@ -1,7 +1,7 @@
 ﻿using TechTalk.SpecFlow;
 using Xunit;
 
-namespace SolidToken.SpecFlow.DependencyInjection.Tests
+namespace SolidToken.SpecFlow.DependencyInjection.Tests.Steps
 {
     [Binding]
     public class DependencyInjectionPluginSteps

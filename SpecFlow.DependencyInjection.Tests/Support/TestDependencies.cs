@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using SolidToken.SpecFlow.DependencyInjection.Tests.Steps;
 
-namespace SolidToken.SpecFlow.DependencyInjection.Tests
+namespace SolidToken.SpecFlow.DependencyInjection.Tests.Support
 {
     public static class TestDependencies
     {
