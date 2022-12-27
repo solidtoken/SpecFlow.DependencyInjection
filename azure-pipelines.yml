@@ -26,16 +26,16 @@ pool:
   # Prefer `ubuntu-latest`, but `NuGetKeyVaultSignTool` won't work anymore on Linux (because of dotnet issue https://github.com/dotnet/runtime/issues/48794)
   # Also make sure that the proper / or \ is used (according to OS) in the 'Sign' task below
   vmImage: 'windows-latest'
-    
+
 stages:
 - stage: CI
   jobs:
   - job: Build
     steps:
     - task: UseDotNet@2
-      displayName: '.NET SDK 6.0 (until November 8, 2024)'
+      displayName: '.NET SDK 7.0 (until November 8, 2024)'
       inputs:
-        version: 6.0.x      
+        version: 7.0.x
     - task: gitversion/setup@0
       displayName: 'Prepare'
       inputs:
@@ -72,7 +72,7 @@ stages:
       inputs:
         codeCoverageTool: 'Cobertura'
         summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
-      
+
 - stage: CD
   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')))
   jobs:
@@ -123,7 +123,7 @@ stages:
         releaseNotesSource: 'inline'
         releaseNotesInline: |
           $(NuGetDescription)
-          *(Publish release to push to NuGet)*          
+          *(Publish release to push to NuGet)*
 
           `$(InformationalVersion)`
         changeLogCompareToRelease: 'lastFullRelease'
