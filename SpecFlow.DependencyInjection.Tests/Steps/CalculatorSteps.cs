@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using SolidToken.SpecFlow.DependencyInjection.Tests.Support;
 using TechTalk.SpecFlow;
 
@@ -41,23 +36,29 @@ namespace SolidToken.SpecFlow.DependencyInjection.Tests.Steps
     [Binding]
     public class CalculatorOperatorSteps
     {
+        private readonly ISpecFlowOutputHelper _output;
         private readonly ICalculator _calculator;
 
-        public CalculatorOperatorSteps(ICalculator calculator)
+        public CalculatorOperatorSteps(ISpecFlowOutputHelper output, ICalculator calculator)
         {
+            _output = output;
             _calculator = calculator;
         }
 
         [When(@"I press Add")]
         public void WhenIPressAdd()
         {
+            _output.WriteLine($"Before Add: {_calculator}");
             _calculator.Add();
+            _output.WriteLine($"After Add: {_calculator}");
         }
 
         [When(@"I press Multiply")]
         public void WhenIPressMultiply()
         {
+            _output.WriteLine($"Before Multiply: {_calculator}");
             _calculator.Multiply();
+            _output.WriteLine($"After Multiply: {_calculator}");
         }
     }
 }
