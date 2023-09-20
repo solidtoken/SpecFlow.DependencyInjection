@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Concurrent;
-using BoDi;
+﻿using BoDi;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using System;
+using System.Collections.Concurrent;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Bindings;
 using TechTalk.SpecFlow.Bindings.Discovery;
@@ -53,8 +54,16 @@ namespace SolidToken.SpecFlow.DependencyInjection
                         var serviceCollectionFinder = args.ObjectContainer.Resolve<IServiceCollectionFinder>();
                         var (services, scoping) = serviceCollectionFinder.GetServiceCollection();
 
-                        RegisterProxyBindings(args.ObjectContainer, services);
-                        return new RootServiceProviderContainer(services.BuildServiceProvider(), scoping);
+                        // we need the concrete type here, to be able to mark it as readonly later
+                        var concreteServices = new ServiceCollection();
+                        foreach (var x in services)
+                        {
+                            concreteServices.Add(x);
+                        }
+                        RegisterProxyBindings(args.ObjectContainer, concreteServices);
+                        args.ObjectContainer.RegisterFactoryAs<IServiceCollection>(_ => concreteServices);
+
+                        return new RootServiceProviderContainer(concreteServices, scoping);
                     });
 
                     args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
@@ -78,11 +87,11 @@ namespace SolidToken.SpecFlow.DependencyInjection
 
             if (spContainer.Scoping == ScopeLevelType.Feature)
             {
-                var serviceProvider = spContainer.ServiceProvider;
-
                 // Now we can register a new scoped service provider
                 args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
                 {
+                    // sesrvice provider creation as late as possible
+                    var serviceProvider = spContainer.ServiceProvider;
                     var scope = serviceProvider.CreateScope();
                     BindMappings.TryAdd(scope.ServiceProvider, args.ObjectContainer.Resolve<IContextManager>());
                     ActiveServiceScopes.TryAdd(args.ObjectContainer.Resolve<FeatureContext>(), scope);
@@ -107,10 +116,11 @@ namespace SolidToken.SpecFlow.DependencyInjection
 
             if (spContainer.Scoping == ScopeLevelType.Scenario)
             {
-                var serviceProvider = spContainer.ServiceProvider;
                 // Now we can register a new scoped service provider
                 args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
                 {
+                    // sesrvice provider creation as late as possible
+                    var serviceProvider = spContainer.ServiceProvider;
                     var scope = serviceProvider.CreateScope();
                     BindMappings.TryAdd(scope.ServiceProvider, args.ObjectContainer.Resolve<IContextManager>());
                     ActiveServiceScopes.TryAdd(args.ObjectContainer.Resolve<ScenarioContext>(), scope);
@@ -181,12 +191,26 @@ namespace SolidToken.SpecFlow.DependencyInjection
 
         private class RootServiceProviderContainer
         {
-            public IServiceProvider ServiceProvider { get; }
+            private IServiceProvider _serviceProvider;
+            public IServiceProvider ServiceProvider
+            {
+                get
+                {
+                    _serviceProvider = _serviceProvider ?? _services.BuildServiceProvider();
+                    // Mark the collection read-only, so that the user of the library knows
+                    // that the provider-has been created and further registrations wouldn't take
+                    // effect
+                    _services.MakeReadOnly();
+                    return _serviceProvider;
+                }
+            }
+            private readonly ServiceCollection _services;
+            public IServiceCollection Services => _services;
             public ScopeLevelType Scoping { get; }
 
-            public RootServiceProviderContainer(IServiceProvider sp, ScopeLevelType scoping)
+            public RootServiceProviderContainer(ServiceCollection services, ScopeLevelType scoping)
             {
-                ServiceProvider = sp;
+                _services = services;
                 Scoping = scoping;
             }
         }
