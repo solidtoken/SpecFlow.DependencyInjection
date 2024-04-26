@@ -71,23 +71,26 @@ namespace SolidToken.SpecFlow.DependencyInjection
             }
         }
 
-        private static void CustomizeFeatureDependenciesEventHandler(object sender, CustomizeFeatureDependenciesEventArgs args)
+        private  void CustomizeFeatureDependenciesEventHandler(object sender, CustomizeFeatureDependenciesEventArgs args)
         {
-            // At this point we have the bindings, we can resolve the service provider, which will build it if it's the first time.
-            var spContainer = args.ObjectContainer.Resolve<RootServiceProviderContainer>();
-
-            if (spContainer.Scoping == ScopeLevelType.Feature)
+            lock (_registrationLock)
             {
-                var serviceProvider = spContainer.ServiceProvider;
+                // At this point we have the bindings, we can resolve the service provider, which will build it if it's the first time.
+                var spContainer = args.ObjectContainer.Resolve<RootServiceProviderContainer>();
 
-                // Now we can register a new scoped service provider
-                args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
+                if (spContainer.Scoping == ScopeLevelType.Feature)
                 {
-                    var scope = serviceProvider.CreateScope();
-                    BindMappings.TryAdd(scope.ServiceProvider, args.ObjectContainer.Resolve<IContextManager>());
-                    ActiveServiceScopes.TryAdd(args.ObjectContainer.Resolve<FeatureContext>(), scope);
-                    return scope.ServiceProvider;
-                });
+                    var serviceProvider = spContainer.ServiceProvider;
+
+                    // Now we can register a new scoped service provider
+                    args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
+                    {
+                        var scope = serviceProvider.CreateScope();
+                        BindMappings.TryAdd(scope.ServiceProvider, args.ObjectContainer.Resolve<IContextManager>());
+                        ActiveServiceScopes.TryAdd(args.ObjectContainer.Resolve<FeatureContext>(), scope);
+                        return scope.ServiceProvider;
+                    });
+                }
             }
         }
 
@@ -100,22 +103,25 @@ namespace SolidToken.SpecFlow.DependencyInjection
             }
         }
 
-        private static void CustomizeScenarioDependenciesEventHandler(object sender, CustomizeScenarioDependenciesEventArgs args)
+        private void CustomizeScenarioDependenciesEventHandler(object sender, CustomizeScenarioDependenciesEventArgs args)
         {
-            // At this point we have the bindings, we can resolve the service provider, which will build it if it's the first time.
-            var spContainer = args.ObjectContainer.Resolve<RootServiceProviderContainer>();
-
-            if (spContainer.Scoping == ScopeLevelType.Scenario)
+            lock (_registrationLock)
             {
-                var serviceProvider = spContainer.ServiceProvider;
-                // Now we can register a new scoped service provider
-                args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
+                // At this point we have the bindings, we can resolve the service provider, which will build it if it's the first time.
+                var spContainer = args.ObjectContainer.Resolve<RootServiceProviderContainer>();
+
+                if (spContainer.Scoping == ScopeLevelType.Scenario)
                 {
-                    var scope = serviceProvider.CreateScope();
-                    BindMappings.TryAdd(scope.ServiceProvider, args.ObjectContainer.Resolve<IContextManager>());
-                    ActiveServiceScopes.TryAdd(args.ObjectContainer.Resolve<ScenarioContext>(), scope);
-                    return scope.ServiceProvider;
-                });
+                    var serviceProvider = spContainer.ServiceProvider;
+                    // Now we can register a new scoped service provider
+                    args.ObjectContainer.RegisterFactoryAs<IServiceProvider>(() =>
+                    {
+                        var scope = serviceProvider.CreateScope();
+                        BindMappings.TryAdd(scope.ServiceProvider, args.ObjectContainer.Resolve<IContextManager>());
+                        ActiveServiceScopes.TryAdd(args.ObjectContainer.Resolve<ScenarioContext>(), scope);
+                        return scope.ServiceProvider;
+                    });
+                }
             }
         }
 
