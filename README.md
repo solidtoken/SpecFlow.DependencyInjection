@@ -1,3 +1,6 @@
+> [!WARNING]
+> This plugin has been ported to [Reqnroll](https://reqnroll.net/) and will no longer be maintained.
+
 # SpecFlow.DependencyInjection
 
 [![GitHub License](https://img.shields.io/github/license/solidtoken/SpecFlow.DependencyInjection.svg)](https://github.com/solidtoken/SpecFlow.DependencyInjection/blob/main/LICENSE) 
